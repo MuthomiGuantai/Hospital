@@ -1,0 +1,16 @@
+server:
+  port: 8101
+  error:
+    include-message: always
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/MedStaff
+    username: root
+    password: Clearme@1824
+    driver-class-name: com.mysql.cj.jdbc.Driver

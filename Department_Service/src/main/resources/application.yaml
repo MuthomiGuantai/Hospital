@@ -1,0 +1,27 @@
+server:
+  port: 8103
+  error:
+    include-message: always
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Department
+    username: root
+    password: Clearme@1824
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+logging:
+  level:
+    com.bruceycode.My_Rest_Api: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
