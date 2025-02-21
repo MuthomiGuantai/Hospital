@@ -9,15 +9,7 @@ import java.time.LocalDate;
 public class MedicalRecord {
 
     @Id
-    @SequenceGenerator(
-            name = "hospital_sequence",
-            sequenceName = "hospital_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "hospital_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 
     private Long id;
     private Long patient_id;
@@ -26,6 +18,9 @@ public class MedicalRecord {
     private LocalDate date;
     private String medication;
     private String test_results;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
     public MedicalRecord() {
     }
