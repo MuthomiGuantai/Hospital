@@ -1,96 +1,44 @@
 package com.bruceycode.Patient_Service.model;
-
 import jakarta.persistence.*;
-
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "medicalrecord")
+@Table(name = "medical_records")
 public class MedicalRecord {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
-    private Long patient_id;
-    private Long doctor_id;
-    private String diagnosis;
-    private LocalDate date;
-    private String medication;
-    private String test_results;
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
 
-    public MedicalRecord() {
+    @Column(name = "patient_id", nullable = false)
+    private Long patientId;
+
+    @Column(name = "doctor_id")
+    private Long doctorId;
+
+    private String condition;
+    private LocalDate diagnosisDate;
+    private String notes;
+
+    public MedicalRecord() {}
+    public MedicalRecord(Long patientId, Long doctorId, String condition, LocalDate diagnosisDate, String notes) {
+        this.patientId = patientId;
+        this.doctorId = doctorId;
+        this.condition = condition;
+        this.diagnosisDate = diagnosisDate;
+        this.notes = notes;
     }
 
-    public MedicalRecord(Long patient_id, Long doctor_id, String diagnosis, LocalDate date, String medication, String test_results) {
-        this.patient_id = patient_id;
-        this.doctor_id = doctor_id;
-        this.diagnosis = diagnosis;
-        this.date = date;
-        this.medication = medication;
-        this.test_results = test_results;
-    }
-
-    public Long getPatient_id() {
-        return patient_id;
-    }
-
-    public void setPatient_id(Long patient_id) {
-        this.patient_id = patient_id;
-    }
-
-    public Long getDoctor_id() {
-        return doctor_id;
-    }
-
-    public void setDoctor_id(Long doctor_id) {
-        this.doctor_id = doctor_id;
-    }
-
-    public String getDiagnosis() {
-        return diagnosis;
-    }
-
-    public void setDiagnosis(String diagnosis) {
-        this.diagnosis = diagnosis;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public String getMedication() {
-        return medication;
-    }
-
-    public void setMedication(String medication) {
-        this.medication = medication;
-    }
-
-    public String getTest_results() {
-        return test_results;
-    }
-
-    public void setTest_results(String test_results) {
-        this.test_results = test_results;
-    }
-
-    @Override
-    public String toString() {
-        return "MedicalRecord{" +
-                "patient_id=" + patient_id +
-                ", doctor_id=" + doctor_id +
-                ", diagnosis='" + diagnosis + '\'' +
-                ", date=" + date +
-                ", medication='" + medication + '\'' +
-                ", test_results='" + test_results + '\'' +
-                '}';
-    }
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public Long getPatientId() { return patientId; }
+    public void setPatientId(Long patientId) { this.patientId = patientId; }
+    public Long getDoctorId() { return doctorId; }
+    public void setDoctorId(Long doctorId) { this.doctorId = doctorId; }
+    public String getCondition() { return condition; }
+    public void setCondition(String condition) { this.condition = condition; }
+    public LocalDate getDiagnosisDate() { return diagnosisDate; }
+    public void setDiagnosisDate(LocalDate diagnosisDate) { this.diagnosisDate = diagnosisDate; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }

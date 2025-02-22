@@ -4,13 +4,22 @@ server:
     include-message: always
 
 spring:
+  config:
+    import: "optional:configserver:http://localhost:8104"
   jpa:
     hibernate:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Patient
     username: root
     password: Clearme@1824
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+

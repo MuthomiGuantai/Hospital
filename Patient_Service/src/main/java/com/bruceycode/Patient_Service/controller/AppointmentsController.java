@@ -1,4 +1,4 @@
 package com.bruceycode.Patient_Service.controller;
 
-public class MedicalRecordController {
+public class AppointmentsController {
 }
