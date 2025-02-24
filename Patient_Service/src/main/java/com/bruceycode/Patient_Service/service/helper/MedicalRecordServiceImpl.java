@@ -26,7 +26,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     private String getMedicalServiceUrl() {
-        return discoveryClient.getInstances("medical-service").get(0).getUri().toString();
+        return discoveryClient.getInstances("medical_service").get(0).getUri().toString();
     }
 
     private void validatePatientExists(Long patientId) {

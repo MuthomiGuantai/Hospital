@@ -17,9 +17,12 @@ spring:
     username: root
     password: Clearme@1824
     driver-class-name: com.mysql.cj.jdbc.Driver
+  application:
+    name: patient_service
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
 

@@ -15,6 +15,7 @@ public class MedicalRecord {
     @Column(name = "doctor_id")
     private Long doctorId;
 
+    @Column(name = "`condition`")
     private String condition;
     private LocalDate diagnosisDate;
     private String notes;
