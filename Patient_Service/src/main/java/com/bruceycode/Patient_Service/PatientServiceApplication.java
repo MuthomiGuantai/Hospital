@@ -17,10 +17,5 @@ public class PatientServiceApplication {
 		SpringApplication.run(PatientServiceApplication.class, args);
 	}
 
-	@Bean
-	@LoadBalanced
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
 
 }

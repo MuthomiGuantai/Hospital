@@ -1,7 +1,7 @@
 package com.bruceycode.Department_Service.controller;
 
 import com.bruceycode.Department_Service.model.Department;
-import com.bruceycode.Department_Service.service.DepartmentService;
+import com.bruceycode.Department_Service.service.helper.DepartmentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.Optional;
 public class DepartmentController {
 
     @Autowired
-    private DepartmentService departmentService;
+    private DepartmentServiceImpl departmentService;
 
     // Create a new department
     @PostMapping("/add")
