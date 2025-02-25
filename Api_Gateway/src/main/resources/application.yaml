@@ -5,6 +5,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
 
 management:
   tracing:
@@ -19,17 +24,31 @@ spring:
   config:
     import: "optional:configserver:http://localhost:8104"
   cloud:
+    loadbalancer:
+      enabled: true
     gateway:
       routes:
         - id: medical_service
-          uri: lb://medical_service
+          uri: lb://MEDICAL_SERVICE
           predicates:
             - Path=/medical/**
+          filters:
+            - RewritePath=/medical/(?<remaining>.*), /${remaining}
         - id: patient_service
-          uri: lb://patient_service
+          uri: lb://PATIENT_SERVICE
           predicates:
             - Path=/patient/**
+          filters:
+            - RewritePath=/patient/(?<remaining>.*), /${remaining}
         - id: department_service
-          uri: lb://department_service
+          uri: lb://DEPARTMENT_SERVICE
           predicates:
             - Path=/department/**
+          filters:
+            - RewritePath=/department/(?<remaining>.*), /${remaining}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.cloud.loadbalancer: TRACE
+    com.netflix.discovery: DEBUG

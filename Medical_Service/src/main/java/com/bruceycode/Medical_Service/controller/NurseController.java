@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/nurses")
+@RequestMapping("/nurses")
 public class NurseController {
 
     private final NurseService nurseService;
