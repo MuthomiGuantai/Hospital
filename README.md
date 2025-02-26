@@ -55,9 +55,19 @@ v
 | (port: 8103)   |
 +----------------+
 
-### Prerequisites
-- Java: JDK 17 or higher
-- Maven: 3.8.x or higher
-- MySQL: 8.0 or higher (with a running instance)
-- IDE: IntelliJ IDEA, VS Code, or Eclipse (optional)
-- curl: For testing API endpoints (optional)
+## Prerequisites
+
+- **Java**: JDK 17 or higher
+- **Maven**: 3.8.x or higher
+- **MySQL**: 8.0 or higher (with a running instance)
+- **IDE**: IntelliJ IDEA, VS Code, or Eclipse (optional)
+- **curl**: For testing API endpoints (optional)
+
+---
+
+## Setup Instructions
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/<your-username>/hospital-management-system.git
+cd hospital-management-system
