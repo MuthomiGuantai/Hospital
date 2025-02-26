@@ -36,16 +36,24 @@ The system follows a microservices architecture:
 - **Department Service**: Manages departments, including doctors and nurses, with validation against `medical_service`.
 
 ### Diagram
-```mermaid
-graph TD
-    A[Client <br> (e.g., curl)] --> B[API Gateway <br> (port: 8100)]
-    B -->|Eureka Discovery| C[Eureka Server <br> (port: 8761)]
-    C -->|registers| D[Medical Service <br> (port: 8101)]
-    C -->|registers| E[Patient Service <br> (port: 8102)]
-    C -->|registers| F[Department Service <br> (port: 8103)]
-    D -->|interacts| C
-    E -->|interacts| C
-    F -->|interacts| C
++----------------+      +----------------+
+|   Client       | ---> | API Gateway    |
+| (e.g., curl)   |      | (port: 8100)   |
++----------------+      +----------------+
+|
+| Eureka Discovery
+v
++----------------+      +----------------+      +----------------+
+| Medical Service| <--> | Eureka Server   | <--> | Patient Service|
+| (port: 8101)   |      | (port: 8761)    |      | (port: 8102)   |
++----------------+      +----------------+      +----------------+
+|
+v
++----------------+
+| Department     |
+| Service        |
+| (port: 8103)   |
++----------------+
 
 ### Prerequisites
 - Java: JDK 17 or higher
