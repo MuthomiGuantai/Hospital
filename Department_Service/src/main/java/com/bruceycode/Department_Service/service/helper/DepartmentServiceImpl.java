@@ -2,6 +2,7 @@ package com.bruceycode.Department_Service.service.helper;
 
 import com.bruceycode.Department_Service.model.Department;
 import com.bruceycode.Department_Service.repository.DepartmentRepository;
+import com.bruceycode.Department_Service.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,41 +10,61 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DepartmentServiceImpl {
+public class DepartmentServiceImpl implements DepartmentService {
+
+    private final DepartmentRepository departmentRepository;
 
     @Autowired
-    private DepartmentRepository departmentRepository;
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+        this.departmentRepository = departmentRepository;
+    }
 
-    // Create a new department
+    private void validateHeadOfDepartment(Department department) {
+        Long headOfDepartment = department.getHeadOfDepartment();
+        List<Long> doctors = department.getDoctors();
+        if (headOfDepartment != null && (doctors == null || !doctors.contains(headOfDepartment))) {
+            throw new IllegalArgumentException("Head of Department must be one of the doctors in the department");
+        }
+    }
+
+    @Override
     public Department createDepartment(Department department) {
+        validateHeadOfDepartment(department);
         return departmentRepository.save(department);
     }
 
-    // Get all departments
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
-    }
-
-    // Get a department by ID
+    @Override
     public Optional<Department> getDepartmentById(Long id) {
         return departmentRepository.findById(id);
     }
 
-    // Update a department
-    public Department updateDepartment(Long id, Department updatedDepartment) {
-        return departmentRepository.findById(id)
-                .map(department -> {
-                    department.setName(updatedDepartment.getName());
-                    department.setDept_head(updatedDepartment.getDept_head());
-                    department.setStaff(updatedDepartment.getStaff());
-                    department.setFacilities(updatedDepartment.getFacilities());
-                    return departmentRepository.save(department);
-                })
-                .orElseThrow(() -> new RuntimeException("Department not found with id: " + id));
+    @Override
+    public List<Department> getAllDepartments() {
+        return departmentRepository.findAll();
     }
 
-    // Delete a department
+    @Override
+    public Department updateDepartment(Long id, Department departmentDetails) {
+        Optional<Department> optionalDepartment = departmentRepository.findById(id);
+        if (optionalDepartment.isPresent()) {
+            Department department = optionalDepartment.get();
+            validateHeadOfDepartment(departmentDetails);
+            department.setName(departmentDetails.getName());
+            department.setHeadOfDepartment(departmentDetails.getHeadOfDepartment());
+            department.setDoctors(departmentDetails.getDoctors());
+            department.setNurses(departmentDetails.getNurses());
+            department.setFacilities(departmentDetails.getFacilities());
+            return departmentRepository.save(department);
+        }
+        throw new RuntimeException("Department not found with ID " + id);
+    }
+
+    @Override
     public void deleteDepartment(Long id) {
-        departmentRepository.deleteById(id);
+        if (departmentRepository.existsById(id)) {
+            departmentRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Department not found with ID " + id);
+        }
     }
 }

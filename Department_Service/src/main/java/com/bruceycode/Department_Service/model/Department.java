@@ -1,36 +1,65 @@
 package com.bruceycode.Department_Service.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "departments")
 public class Department {
 
     @Id
-    @SequenceGenerator(
-            name = "student_sequence",
-            sequenceName = "student_sequence",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "student_sequence"
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long departmentId;
 
-    private Long id;
+    @Column(nullable = false)
     private String name;
-    private String dept_head;
-    private String staff;
-    private String facilities;
 
+    // Reference to the doctor in charge (must be one of the doctors in the department)
+    private Long headOfDepartment;
+
+    // List of doctor IDs in the department
+    @ElementCollection
+    @CollectionTable(name = "department_doctors", joinColumns = @JoinColumn(name = "department_id"))
+    @Column(name = "doctor_id")
+    private List<Long> doctors;
+
+    // List of nurse IDs in the department
+    @ElementCollection
+    @CollectionTable(name = "department_nurses", joinColumns = @JoinColumn(name = "department_id"))
+    @Column(name = "nurse_id")
+    private List<Long> nurses;
+
+    // List of facilities available in the department
+    @ElementCollection
+    @CollectionTable(name = "department_facilities", joinColumns = @JoinColumn(name = "department_id"))
+    @Column(name = "facility")
+    private List<String> facilities;
+
+    // Default constructor
     public Department() {
+        this.doctors = new ArrayList<>();
+        this.nurses = new ArrayList<>();
+        this.facilities = new ArrayList<>();
     }
 
-    public Department(String name, String dept_head, String staff, String facilities) {
+    // Parameterized constructor
+    public Department(Long departmentId, String name, Long headOfDepartment, List<Long> doctors, List<Long> nurses, List<String> facilities) {
+        this.departmentId = departmentId;
         this.name = name;
-        this.dept_head = dept_head;
-        this.staff = staff;
-        this.facilities = facilities;
+        this.headOfDepartment = headOfDepartment;
+        this.doctors = doctors != null ? new ArrayList<>(doctors) : new ArrayList<>();
+        this.nurses = nurses != null ? new ArrayList<>(nurses) : new ArrayList<>();
+        this.facilities = facilities != null ? new ArrayList<>(facilities) : new ArrayList<>();
+    }
+
+    // Getters and Setters
+    public Long getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
     public String getName() {
@@ -41,37 +70,35 @@ public class Department {
         this.name = name;
     }
 
-    public String getDept_head() {
-        return dept_head;
+    public Long getHeadOfDepartment() {
+        return headOfDepartment;
     }
 
-    public void setDept_head(String dept_head) {
-        this.dept_head = dept_head;
+    public void setHeadOfDepartment(Long headOfDepartment) {
+        this.headOfDepartment = headOfDepartment;
     }
 
-    public String getStaff() {
-        return staff;
+    public List<Long> getDoctors() {
+        return doctors;
     }
 
-    public void setStaff(String staff) {
-        this.staff = staff;
+    public void setDoctors(List<Long> doctors) {
+        this.doctors = doctors != null ? new ArrayList<>(doctors) : new ArrayList<>();
     }
 
-    public String getFacilities() {
+    public List<Long> getNurses() {
+        return nurses;
+    }
+
+    public void setNurses(List<Long> nurses) {
+        this.nurses = nurses != null ? new ArrayList<>(nurses) : new ArrayList<>();
+    }
+
+    public List<String> getFacilities() {
         return facilities;
     }
 
-    public void setFacilities(String facilities) {
-        this.facilities = facilities;
-    }
-
-    @Override
-    public String toString() {
-        return "Department{" +
-                "name='" + name + '\'' +
-                ", dept_head='" + dept_head + '\'' +
-                ", staff='" + staff + '\'' +
-                ", facilities='" + facilities + '\'' +
-                '}';
+    public void setFacilities(List<String> facilities) {
+        this.facilities = facilities != null ? new ArrayList<>(facilities) : new ArrayList<>();
     }
 }
