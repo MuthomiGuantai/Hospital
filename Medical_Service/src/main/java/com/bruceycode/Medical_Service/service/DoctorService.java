@@ -1,6 +1,6 @@
 package com.bruceycode.Medical_Service.service;
 
-import com.bruceycode.Medical_Service.model.Doctor;
+import com.bruceycode.Medical_Service.model.entity.Doctor;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,7 +1,7 @@
 package com.bruceycode.Medical_Service.service.helper;
 
-import com.bruceycode.Medical_Service.model.Nurse;
-import com.bruceycode.Medical_Service.model.Patient;
+import com.bruceycode.Medical_Service.model.entity.Nurse;
+import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.repository.NurseRepository;
 import com.bruceycode.Medical_Service.repository.PatientRepository;
 import com.bruceycode.Medical_Service.service.NurseService;

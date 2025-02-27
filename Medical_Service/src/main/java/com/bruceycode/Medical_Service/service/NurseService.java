@@ -1,7 +1,7 @@
 package com.bruceycode.Medical_Service.service;
 
 // Service Interface
-import com.bruceycode.Medical_Service.model.Nurse;
+import com.bruceycode.Medical_Service.model.entity.Nurse;
 import java.util.List;
 import java.util.Optional;
 

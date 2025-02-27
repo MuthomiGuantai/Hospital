@@ -1,5 +1,6 @@
 package com.bruceycode.Department_Service.controller;
 
+import com.bruceycode.Department_Service.dto.DepartmentDTO;
 import com.bruceycode.Department_Service.model.Department;
 import com.bruceycode.Department_Service.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +27,20 @@ public class DepartmentController {
             Department createdDepartment = departmentService.createDepartment(department);
             return ResponseEntity.ok(createdDepartment);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // 400 for validation errors
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Department> getDepartmentById(@PathVariable Long id) {
-        Optional<Department> department = departmentService.getDepartmentById(id);
+    public ResponseEntity<DepartmentDTO> getDepartmentById(@PathVariable Long id) {
+        Optional<DepartmentDTO> department = departmentService.getDepartmentById(id);
         return department.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<Department>> getAllDepartments() {
-        List<Department> departments = departmentService.getAllDepartments();
+    public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
+        List<DepartmentDTO> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);
     }
 
@@ -49,9 +50,9 @@ public class DepartmentController {
             Department updatedDepartment = departmentService.updateDepartment(id, departmentDetails);
             return ResponseEntity.ok(updatedDepartment);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // 400 for validation errors
+            return ResponseEntity.badRequest().body(null);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // 404 for not found
+            return ResponseEntity.notFound().build();
         }
     }
 

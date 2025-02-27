@@ -1,7 +1,7 @@
 package com.bruceycode.Medical_Service.controller;
 
-import com.bruceycode.Medical_Service.model.Nurse;
-import com.bruceycode.Medical_Service.model.Patient;
+import com.bruceycode.Medical_Service.model.entity.Nurse;
+import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.service.NurseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

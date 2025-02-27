@@ -1,6 +1,6 @@
 package com.bruceycode.Medical_Service.controller;
 
-import com.bruceycode.Medical_Service.model.Patient;
+import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

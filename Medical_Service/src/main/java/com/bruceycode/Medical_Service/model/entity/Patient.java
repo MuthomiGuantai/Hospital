@@ -1,4 +1,4 @@
-package com.bruceycode.Medical_Service.model;
+package com.bruceycode.Medical_Service.model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 

@@ -23,7 +23,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
+    fetch-registry: true
+    register-with-eureka: true
 logging:
   level:
     com.bruceycode.My_Rest_Api: DEBUG
