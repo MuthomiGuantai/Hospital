@@ -130,25 +130,42 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department createDepartment(Department department) {
+        logger.info("Creating department: {}", department);
         validateHeadOfDepartment(department);
         validateDoctors(department.getDoctors());
-        return departmentRepository.save(department);
+        Department savedDepartment = departmentRepository.save(department);
+        logger.info("Successfully created department: {}", savedDepartment);
+        return savedDepartment;
     }
 
     @Override
     public Optional<DepartmentDTO> getDepartmentById(Long id) {
-        return departmentRepository.findById(id).map(this::mapToDTO);
+        logger.info("Fetching department by ID: {}", id);
+        Optional<Department> department = departmentRepository.findById(id);
+        if (department.isPresent()) {
+            DepartmentDTO dto = mapToDTO(department.get());
+            logger.info("Successfully fetched department ID {}: {}", id, dto);
+            return Optional.of(dto);
+        } else {
+            logger.warn("No department found for ID: {}", id);
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<DepartmentDTO> getAllDepartments() {
-        return departmentRepository.findAll().stream()
+        logger.info("Fetching all the departments");
+        List<Department> departments = departmentRepository.findAll();
+        List<DepartmentDTO> dtos = departments.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+        logger.info("Successfully fetched {} departments", dtos.size());
+        return dtos;
     }
 
     @Override
     public Department updateDepartment(Long id, Department departmentDetails) {
+        logger.info("Updating department ID {} with details: {}", id, departmentDetails);
         Optional<Department> optionalDepartment = departmentRepository.findById(id);
         if (optionalDepartment.isPresent()) {
             Department department = optionalDepartment.get();
@@ -159,16 +176,22 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setDoctors(departmentDetails.getDoctors());
             department.setNurses(departmentDetails.getNurses());
             department.setFacilities(departmentDetails.getFacilities());
-            return departmentRepository.save(department);
+            Department updatedDepartment = departmentRepository.save(department);
+            logger.info("Successfully updated department ID {}: {}", id, updatedDepartment);
+            return updatedDepartment;
         }
+        logger.error("Department not found for update with ID: {}", id);
         throw new RuntimeException("Department not found with ID " + id);
     }
 
     @Override
     public void deleteDepartment(Long id) {
+        logger.info("Deleting department with ID: {}", id);
         if (departmentRepository.existsById(id)) {
             departmentRepository.deleteById(id);
+            logger.info("Successfully deleted department with ID: {}", id);
         } else {
+            logger.error("Department not found for deletion with ID: {}", id);
             throw new RuntimeException("Department not found with ID " + id);
         }
     }

@@ -20,22 +20,18 @@ public class Department {
     @Column(nullable = false)
     private String name;
 
-    // Reference to the doctor in charge (must be one of the doctors in the department)
     private Long headOfDepartment;
 
-    // List of doctor IDs in the department
     @ElementCollection
     @CollectionTable(name = "department_doctors", joinColumns = @JoinColumn(name = "department_id"))
     @Column(name = "doctor_id")
     private List<Long> doctors;
 
-    // List of nurse IDs in the department
     @ElementCollection
     @CollectionTable(name = "department_nurses", joinColumns = @JoinColumn(name = "department_id"))
     @Column(name = "nurse_id")
     private List<Long> nurses;
 
-    // List of facilities available in the department
     @ElementCollection
     @CollectionTable(name = "department_facilities", joinColumns = @JoinColumn(name = "department_id"))
     @Column(name = "facility")
