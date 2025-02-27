@@ -1,5 +1,7 @@
 package com.bruceycode.Api_Gateway.Util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -13,6 +15,7 @@ import java.net.URI;
 
 public class LoadBalancerGatewayFilter implements GatewayFilter {
     private final LoadBalancerClient loadBalancerClient;
+    private final Logger logger = LoggerFactory.getLogger(LoadBalancerGatewayFilter.class);
 
     public LoadBalancerGatewayFilter(LoadBalancerClient loadBalancerClient) {
         this.loadBalancerClient = loadBalancerClient;
@@ -21,16 +24,16 @@ public class LoadBalancerGatewayFilter implements GatewayFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
-        System.out.println("Route: " + (route != null ? route.getId() : "null")); // Debug
+        logger.info("Route: " + (route != null ? route.getId() : "null")); // Debug
         if (route == null) {
-            System.out.println("No route found in exchange"); // Debug
+            logger.warn("No route found in exchange"); // Debug
             return chain.filter(exchange);
         }
 
         URI originalUri = route.getUri();
-        System.out.println("Original URI: " + originalUri); // Debug
+        logger.info("Original URI: " + originalUri); // Debug
         if (originalUri == null || !"lb".equals(originalUri.getScheme())) {
-            System.out.println("URI is null or not lb:// scheme: " + originalUri); // Debug
+            logger.warn("URI is null or not lb:// scheme: " + originalUri); // Debug
             return chain.filter(exchange);
         }
 
@@ -40,21 +43,22 @@ public class LoadBalancerGatewayFilter implements GatewayFilter {
             if (uriString.startsWith("lb://")) {
                 serviceId = uriString.substring("lb://".length()).split("/")[0];
             }
-            System.out.println("Extracted serviceId from URI: " + serviceId); // Debug
+            logger.info("Extracted serviceId from URI: " + serviceId); // Debug
             if (serviceId == null || serviceId.isEmpty()) {
+                logger.error("Service ID is null or empty for URI: {}", originalUri);
                 return Mono.error(new RuntimeException("Service ID is null or empty for URI: " + originalUri));
             }
         }
 
         ServiceInstance instance = loadBalancerClient.choose(serviceId);
         if (instance == null) {
-            System.out.println("No instance available for " + serviceId); // Debug
+            logger.error("No instance available for " + serviceId); // Debug
             return Mono.error(new RuntimeException("No instance available for " + serviceId));
         }
 
         String resolvedUrl = instance.getUri().toString() + exchange.getRequest().getPath().value();
         URI resolvedUri = URI.create(resolvedUrl);
-        System.out.println("Resolved URI: " + resolvedUri); // Debug
+        logger.info("Resolved URI: " + resolvedUri); // Debug
 
         Route modifiedRoute = Route.async()
                 .id(route.getId())
@@ -70,7 +74,7 @@ public class LoadBalancerGatewayFilter implements GatewayFilter {
         ServerWebExchange modifiedExchange = exchange.mutate()
                 .request(exchange.getRequest().mutate().uri(resolvedUri).build())
                 .build();
-        System.out.println("Modified URI: " + modifiedExchange.getRequest().getURI()); // Debug
+        logger.info("Modified URI: " + modifiedExchange.getRequest().getURI()); // Debug
         return chain.filter(modifiedExchange);
     }
 }
