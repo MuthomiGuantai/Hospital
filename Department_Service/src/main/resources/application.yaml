@@ -27,8 +27,9 @@ eureka:
     register-with-eureka: true
 logging:
   level:
-    com.bruceycode.My_Rest_Api: DEBUG
+    com.bruceycode.Department_Service: DEBUG
     org:
+      springframework: TRACE
       hibernate:
         SQL: DEBUG
         type:

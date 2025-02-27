@@ -28,3 +28,15 @@ eureka:
   instance:
     prefer-ip-address: true
     hostname: localhost
+
+logging:
+  level:
+    com.bruceycode.Medical_Service: DEBUG
+    org:
+      springframework: TRACE
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE

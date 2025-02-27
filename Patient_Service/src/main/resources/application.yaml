@@ -27,4 +27,16 @@ eureka:
     prefer-ip-address: true
     hostname: localhost
 
+logging:
+  level:
+    com.bruceycode.Patient_Service: DEBUG
+    org:
+      springframework: TRACE
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+
 
