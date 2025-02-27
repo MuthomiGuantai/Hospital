@@ -1,11 +1,14 @@
 package com.bruceycode.Medical_Service.model.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "doctors")
+@Data
 public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,11 +1,16 @@
 package com.bruceycode.Department_Service.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "departments")
+@Data
 public class Department {
 
     @Id
@@ -36,14 +41,12 @@ public class Department {
     @Column(name = "facility")
     private List<String> facilities;
 
-    // Default constructor
     public Department() {
         this.doctors = new ArrayList<>();
         this.nurses = new ArrayList<>();
         this.facilities = new ArrayList<>();
     }
 
-    // Parameterized constructor
     public Department(Long departmentId, String name, Long headOfDepartment, List<Long> doctors, List<Long> nurses, List<String> facilities) {
         this.departmentId = departmentId;
         this.name = name;
@@ -53,7 +56,6 @@ public class Department {
         this.facilities = facilities != null ? new ArrayList<>(facilities) : new ArrayList<>();
     }
 
-    // Getters and Setters
     public Long getDepartmentId() {
         return departmentId;
     }

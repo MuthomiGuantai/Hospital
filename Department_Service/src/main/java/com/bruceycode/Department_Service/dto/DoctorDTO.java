@@ -4,13 +4,15 @@ public class DoctorDTO {
     private Long id;
     private String name;
     private String specialization;
+    private String schedule;
 
     public DoctorDTO() {}
 
-    public DoctorDTO(Long id, String name, String specialization) {
+    public DoctorDTO(Long id, String name, String specialization, String schedule) {
         this.id = id;
         this.name = name;
         this.specialization = specialization;
+        this.schedule = schedule;
     }
 
     public Long getId() {
@@ -35,5 +37,13 @@ public class DoctorDTO {
 
     public void setSpecialization(String specialization) {
         this.specialization = specialization;
+    }
+
+    public String getSchedule(){
+        return schedule;
+    }
+
+    public void setSchedule(String schedule) {
+        this.schedule = schedule;
     }
 }

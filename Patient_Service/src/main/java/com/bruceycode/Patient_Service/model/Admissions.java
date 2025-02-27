@@ -1,9 +1,12 @@
 package com.bruceycode.Patient_Service.model;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "admissions")
+@Data
 public class Admissions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +27,6 @@ public class Admissions {
         this.reason = reason;
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getPatientId() { return patientId; }

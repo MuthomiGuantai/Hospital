@@ -1,6 +1,7 @@
 package com.bruceycode.Medical_Service.model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "patients")
+@Data
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,17 +30,15 @@ public class Patient {
     @Column
     private LocalDate dob;
 
-    // Many-to-many with Doctor
     @ManyToMany(mappedBy = "patients")
     @JsonBackReference("patient-doctor")
     private List<Doctor> doctors = new ArrayList<>();
 
-    // Many-to-many with Nurse
+
     @ManyToMany(mappedBy = "patients")
     @JsonBackReference("patient-nurse")
     private List<Nurse> nurses = new ArrayList<>();
 
-    // Constructors
     public Patient() {}
 
     public Patient(String name, String gender, String email, Integer phone_number, LocalDate dob) {
@@ -49,7 +49,6 @@ public class Patient {
         this.dob = dob;
     }
 
-    // Getters and Setters
     public Long getPatientId() { return patientId; }
     public void setPatientId(Long patientId) { this.patientId = patientId; }
     public String getName() { return name; }

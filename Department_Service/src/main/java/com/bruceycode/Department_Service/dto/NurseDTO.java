@@ -1,16 +1,19 @@
 package com.bruceycode.Department_Service.dto;
 
+import lombok.Data;
+
+@Data
 public class NurseDTO {
     private Long id;
     private String name;
-    private String gender;
+    private String shiftSchedule;
 
     public NurseDTO() {}
 
-    public NurseDTO(Long id, String name, String gender) {
+    public NurseDTO(Long id, String name, String shiftSchedule) {
         this.id = id;
         this.name = name;
-        this.gender = gender;
+        this.shiftSchedule = shiftSchedule;
     }
 
     public Long getId() {
@@ -29,11 +32,11 @@ public class NurseDTO {
         this.name = name;
     }
 
-    public String getQualification() {
-        return gender;
+    public String getShiftSchedule() {
+        return shiftSchedule;
     }
 
-    public void setQualification(String gender) {
-        this.gender = gender;
+    public void setShiftSchedule(String shiftSchedule) {
+        this.shiftSchedule = shiftSchedule;
     }
 }
