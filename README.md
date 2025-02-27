@@ -69,7 +69,8 @@ v
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/hospital-management-system.git
+git clone https://github.com/MuthomiGuantai/Hospital.git
+```
 cd hospital-management-system
 
 ### 2. Set Up MySQL Database
@@ -81,11 +82,13 @@ cd hospital-management-system
 ### Create Databases
 Log in to MySQL:
    ```bash
-mysql -u root -p```
+mysql -u root -p
+```
    ```MySQL
 CREATE DATABASE medical_db;
 CREATE DATABASE patient_db;
-CREATE DATABASE department_db;```
+CREATE DATABASE department_db;
+```
 
 ### 3. Build Each Service
 Navigate to each service directory and build with Maven:
@@ -94,37 +97,45 @@ cd eureka-server && mvn clean install
 cd ../api-gateway && mvn clean install
 cd ../medical-service && mvn clean install
 cd ../patient-service && mvn clean install
-cd ../department-service && mvn clean install```
+cd ../department-service && mvn clean install
+```
 
 ### 4. Run the Services
 Start each service in separate terminal windows:
- ###Eureka Server
- ```bash
- java -jar eureka-server/target/eureka-server-0.0.1-SNAPSHOT.jar```
- ###Api Gateway
- ```bash
- java -jar api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar```
- ###Medical Service
- ```bash
- java -jar medical-service/target/medical-service-0.0.1-SNAPSHOT.jar```
- ###Patient Service
- ```bash
- java -jar patient-service/target/patient-service-0.0.1-SNAPSHOT.jar```
- ###Department Service
- ```bash
- java -jar department-service/target/department-service-0.0.1-SNAPSHOT.jar```
 
-###5. Verify Eureka Registration
+ ### Eureka Server
+ ```bash
+ java -jar eureka-server/target/eureka-server-0.0.1-SNAPSHOT.jar
+```
+
+ ### Api Gateway
+```bash
+ java -jar api-gateway/target/api-gateway-0.0.1-SNAPSHOT.jar
+```
+
+ ### Medical Service
+ ```bash
+ java -jar medical-service/target/medical-service-0.0.1-SNAPSHOT.jar
+```
+ ### Patient Service
+ ```bash
+ java -jar patient-service/target/patient-service-0.0.1-SNAPSHOT.jar
+```
+ ### Department Service
+ ```bash
+ java -jar department-service/target/department-service-0.0.1-SNAPSHOT.jar
+```
+### 5. Verify Eureka Registration
 Open http://localhost:8761 in a browser to see registered services 
 (MEDICAL_SERVICE, PATIENT_SERVICE, DEPARTMENT_SERVICE, API-GATEWAY).
 
 ## Services
-| Service          | Port | Description                          |
-|------------------|------|--------------------------------------|
-| Eureka Server    | 8761 | Service registry for discovery       |
-| API Gateway      | 8100 | Routes requests to microservices     |
-| Medical Service  | 8101 | Manages doctors and patients         |
-| Patient Service  | 8102 | Manages medical records              |
+| Service            | Port | Description                          |
+|--------------------|------|--------------------------------------|
+| Eureka Server      | 8761 | Service registry for discovery       |
+| API Gateway        | 8100 | Routes requests to microservices     |
+| Medical Service    | 8101 | Manages doctors and patients         |
+| Patient Service    | 8102 | Manages medical records              |
 | Department Service | 8103 | Manages hospital departments         |
 
 ## Usage
@@ -136,20 +147,25 @@ Open http://localhost:8761 in a browser to see registered services
 ### Medical Service (via Gateway: /medical/**)
 - **GET** /medical/doctors/{id}: Retrieve a doctor by ID.
 ```bash
-curl -X POST http://localhost:8100/patient/medical-records -H "Content-Type: application/json" -d '{"patientId": 1, "doctorId": 1, "condition": "Flu", "diagnosisDate": "2025-02-25", "notes": "Rest advised"}'```
+curl -X POST http://localhost:8100/patient/medical-records -H "Content-Type: application/json" -d '{"patientId": 1, "doctorId": 1, "condition": "Flu", "diagnosisDate": "2025-02-25", "notes": "Rest advised"}
+```
 
-###Patient Service (via Gateway: /patient/**)
+### Patient Service (via Gateway: /patient/**)
 - **POST** /patient/medical-records: Create a medical record.
 ```bash
-curl -X POST http://localhost:8100/patient/medical-records -H "Content-Type: application/json" -d '{"patientId": 1, "doctorId": 1, "condition": "Flu", "diagnosisDate": "2025-02-25", "notes": "Rest advised"}'```
+curl -X POST http://localhost:8100/patient/medical-records -H "Content-Type: application/json" -d '{"patientId": 1, "doctorId": 1, "condition": "Flu", "diagnosisDate": "2025-02-25", "notes": "Rest advised"}
+```
 
-###Department Service (via Gateway: /department/**)
+### Department Service (via Gateway: /department/**)
 - **POST** /department/departments: Create a department.
 ```bash
-curl -X POST http://localhost:8100/department/departments -H "Content-Type: application/json" -d '{"name": "Cardiology", "headOfDepartment": 1, "doctors": [1, 2], "nurses": [3, 4], "facilities": ["ECG", "X-Ray"]}'```
+curl -X POST http://localhost:8100/department/departments -H "Content-Type: application/json" -d '{"name": "Cardiology", "headOfDepartment": 1, "doctors": [1, 2], "nurses": [3, 4], "facilities": ["ECG", "X-Ray"]}
+```
 - **GET** /department/departments/{id}: Retrieve a department by ID.
 ```bash
-curl http://localhost:8100/department/departments/1```
+curl http://localhost:8100/department/departments/1
+```
 - **GET** /department/departments: List all departments
 ```bash
-curl http://localhost:8100/department/departments```
+curl http://localhost:8100/department/departments
+```
