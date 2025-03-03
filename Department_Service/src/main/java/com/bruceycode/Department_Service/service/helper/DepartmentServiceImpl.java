@@ -31,7 +31,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Autowired
     public DepartmentServiceImpl(DepartmentRepository departmentRepository, RestTemplate restTemplate, LoadBalancerClient loadBalancerClient) {
         this.departmentRepository = departmentRepository;
-        this.restTemplate = restTemplate; // Non-@LoadBalanced is fine here
+        this.restTemplate = restTemplate;
         this.loadBalancerClient = loadBalancerClient;
         logger.info("Initialized with RestTemplate: {}", restTemplate.getClass().getName());
     }
@@ -57,7 +57,6 @@ public class DepartmentServiceImpl implements DepartmentService {
                     }
                     String url = instance.getUri().toString() + "/doctors/" + doctorId;
                     logger.info("Attempting to validate doctor ID {} with resolved URI: {}", doctorId, url);
-                    // Use plain RestTemplate call without LoadBalancer interference
                     RestTemplate plainRestTemplate = new RestTemplate();
                     DoctorDTO doctor = plainRestTemplate.getForObject(url, DoctorDTO.class);
                     if (doctor == null) {
@@ -68,6 +67,32 @@ public class DepartmentServiceImpl implements DepartmentService {
                 } catch (Exception e) {
                     logger.error("Failed to validate doctor ID {}: {} - Stacktrace: {}", doctorId, e.getMessage(), e.getStackTrace());
                     throw new IllegalArgumentException("Doctor with ID " + doctorId + " does not exist in medical_service");
+                }
+            }
+        }
+    }
+
+    private void validateNurses(List<Long> nurseIds) {
+        if (nurseIds != null) {
+            for (Long nurseId : nurseIds) {
+                try {
+                    ServiceInstance instance = loadBalancerClient.choose("MEDICAL_SERVICE");
+                    if (instance == null) {
+                        logger.error("No instance available for MEDICAL_SERVICE");
+                        throw new IllegalStateException("No MEDICAL_SERVICE instance found in Eureka");
+                    }
+                    String url = instance.getUri().toString() + "/nurses/" + nurseId;
+                    logger.info("Attempting to validate nurse ID {} with resolved URI: {}", nurseId, url);
+                    RestTemplate plainRestTemplate = new RestTemplate();
+                    NurseDTO nurse = plainRestTemplate.getForObject(url, NurseDTO.class);
+                    if (nurse == null) {
+                        logger.error("No nurse found for ID {} at URI: {}", nurseId, url);
+                        throw new IllegalArgumentException("Nurse with ID " + nurseId + " does not exist in medical_service");
+                    }
+                    logger.info("Validated nurse ID {}: {}", nurseId, nurse);
+                } catch (Exception e) {
+                    logger.error("Failed to validate nurse ID {}: {} - Stacktrace: {}", nurseId, e.getMessage(), e.getStackTrace());
+                    throw new IllegalArgumentException("Nurse with ID " + nurseId + " does not exist in medical_service");
                 }
             }
         }
@@ -133,6 +158,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         logger.info("Creating department: {}", department);
         validateHeadOfDepartment(department);
         validateDoctors(department.getDoctors());
+        validateNurses(department.getNurses());
         Department savedDepartment = departmentRepository.save(department);
         logger.info("Successfully created department: {}", savedDepartment);
         return savedDepartment;

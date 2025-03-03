@@ -29,14 +29,9 @@ public class DepartmentController {
     @PostMapping
     public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
         logger.info("Received POST request to create department: {}", department);
-        try {
-            Department createdDepartment = departmentService.createDepartment(department);
-            logger.info("Successfully created department: {}", createdDepartment);
-            return ResponseEntity.ok(createdDepartment);
-        } catch (IllegalArgumentException e) {
-            logger.error("Failed to create department due to validation error: {}", e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        }
+        Department createdDepartment = departmentService.createDepartment(department);
+        logger.info("Successfully created department: {}", createdDepartment);
+        return ResponseEntity.ok(createdDepartment);
     }
 
     @GetMapping("/{id}")
@@ -63,29 +58,16 @@ public class DepartmentController {
     @PutMapping("/{id}")
     public ResponseEntity<Department> updateDepartment(@PathVariable Long id, @RequestBody Department departmentDetails) {
         logger.info("Received PUT request to update department ID {} with details: {}", id, departmentDetails);
-        try {
-            Department updatedDepartment = departmentService.updateDepartment(id, departmentDetails);
-            logger.info("Successfully updated department ID {}: {}", id, updatedDepartment);
-            return ResponseEntity.ok(updatedDepartment);
-        } catch (IllegalArgumentException e) {
-            logger.error("Failed to update department ID {} due to validation error: {}", id, e.getMessage());
-            return ResponseEntity.badRequest().body(null);
-        } catch (RuntimeException e) {
-            logger.warn("Department not found for update with ID: {}", id);
-            return ResponseEntity.notFound().build();
-        }
+        Department updatedDepartment = departmentService.updateDepartment(id, departmentDetails);
+        logger.info("Successfully updated department ID {}: {}", id, updatedDepartment);
+        return ResponseEntity.ok(updatedDepartment);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDepartment(@PathVariable Long id) {
         logger.info("Received DELETE request for department ID: {}", id);
-        try {
-            departmentService.deleteDepartment(id);
-            logger.info("Successfully deleted department ID: {}", id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            logger.warn("Department not found for deletion with ID: {}", id);
-            return ResponseEntity.notFound().build();
-        }
+        departmentService.deleteDepartment(id);
+        logger.info("Successfully deleted department ID: {}", id);
+        return ResponseEntity.noContent().build();
     }
 }
