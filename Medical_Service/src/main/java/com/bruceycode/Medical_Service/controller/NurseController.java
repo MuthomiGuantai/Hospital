@@ -1,5 +1,6 @@
 package com.bruceycode.Medical_Service.controller;
 
+import com.bruceycode.Medical_Service.model.entity.Doctor;
 import com.bruceycode.Medical_Service.model.entity.Nurse;
 import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.service.NurseService;
@@ -27,16 +28,19 @@ public class NurseController {
         logger.info("NurseController initialized with NurseService");
     }
 
-    // Create a new nurse
+
     @PostMapping("/register")
     public ResponseEntity<Nurse> createNurse(@RequestBody Nurse nurse) {
         logger.info("Received POST request to create nurse: {}", nurse);
+        if (nurse.getName() == null || nurse.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Patient name cannot be null or empty");
+        }
         Nurse createdNurse = nurseService.createNurse(nurse);
         logger.info("Successfully created nurse: {}", createdNurse);
         return new ResponseEntity<>(createdNurse, HttpStatus.CREATED);
     }
 
-    // Get a nurse by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<Nurse> getNurseById(@PathVariable Long id) {
         logger.info("Received GET request for nurse ID: {}", id);
@@ -46,11 +50,10 @@ public class NurseController {
             return new ResponseEntity<>(nurse.get(), HttpStatus.OK);
         } else {
             logger.warn("Nurse not found for ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new RuntimeException("Nurse not found for ID: " + id);
         }
     }
 
-    // Get all nurses
     @GetMapping
     public ResponseEntity<List<Nurse>> getAllNurses() {
         logger.info("Received GET request for all nurses");
@@ -59,33 +62,22 @@ public class NurseController {
         return new ResponseEntity<>(nurses, HttpStatus.OK);
     }
 
-    // Update a nurse
     @PutMapping("/{id}")
     public ResponseEntity<Nurse> updateNurse(@PathVariable Long id,
                                              @RequestBody Nurse nurseDetails) {
         logger.info("Received PUT request to update nurse ID {} with details: {}", id, nurseDetails);
-        try {
-            Nurse updatedNurse = nurseService.updateNurse(id, nurseDetails);
-            logger.info("Successfully updated nurse ID {}: {}", id, updatedNurse);
-            return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.warn("Nurse not found for update with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Nurse updatedNurse = nurseService.updateNurse(id, nurseDetails);
+        logger.info("Successfully updated nurse ID {}: {}", id, updatedNurse);
+        return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
     }
 
-    // Delete a nurse
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNurse(@PathVariable Long id) {
         logger.info("Received DELETE request for nurse ID: {}", id);
-        try {
-            nurseService.deleteNurse(id);
-            logger.info("Successfully deleted nurse ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            logger.warn("Nurse not found for deletion with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        nurseService.deleteNurse(id);
+        logger.info("Successfully deleted nurse ID: {}", id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{nurseId}/patients")
@@ -93,13 +85,8 @@ public class NurseController {
             @PathVariable Long nurseId,
             @RequestBody Patient patient) {
         logger.info("Received POST request to add patient ID {} to nurse ID: {}", patient.getPatientId(), nurseId);
-        try {
-            Nurse updatedNurse = nurseService.addPatientToNurse(nurseId, patient.getPatientId());
-            logger.info("Successfully added patient ID {} to nurse ID {}: {}", patient.getPatientId(), nurseId, updatedNurse);
-            return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.error("Failed to add patient ID {} to nurse ID {}: {}", patient.getPatientId(), nurseId, e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Nurse updatedNurse = nurseService.addPatientToNurse(nurseId, patient.getPatientId());
+        logger.info("Successfully added patient ID {} to nurse ID {}: {}", patient.getPatientId(), nurseId, updatedNurse);
+        return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
     }
 }

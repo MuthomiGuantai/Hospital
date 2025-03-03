@@ -27,16 +27,20 @@ public class DoctorController {
         logger.info("DoctorController initialized with DoctorService");
     }
 
-    // Create a new doctor
+
+
     @PostMapping("/register")
     public ResponseEntity<Doctor> createDoctor(@RequestBody Doctor doctor) {
         logger.info("Received POST request to create doctor: {}", doctor);
+        if (doctor.getName() == null || doctor.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Doctor name cannot be null or empty");
+        }
         Doctor createdDoctor = doctorService.createDoctor(doctor);
         logger.info("Successfully created doctor: {}", createdDoctor);
         return new ResponseEntity<>(createdDoctor, HttpStatus.CREATED);
     }
 
-    // Get a doctor by ID
+
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
         logger.info("Received GET request for doctor ID: {}", id);
@@ -46,11 +50,11 @@ public class DoctorController {
             return new ResponseEntity<>(doctor.get(), HttpStatus.OK);
         } else {
             logger.warn("Doctor not found for ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new RuntimeException("Doctor not found for ID: " + id);
         }
     }
 
-    // Get all doctors
+
     @GetMapping
     public ResponseEntity<List<Doctor>> getAllDoctors() {
         logger.info("Received GET request for all doctors");
@@ -59,33 +63,22 @@ public class DoctorController {
         return new ResponseEntity<>(doctors, HttpStatus.OK);
     }
 
-    // Update a doctor
+
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> updateDoctor(@PathVariable Long id,
                                                @RequestBody Doctor doctorDetails) {
         logger.info("Received PUT request to update doctor ID {} with details: {}", id, doctorDetails);
-        try {
-            Doctor updatedDoctor = doctorService.updateDoctor(id, doctorDetails);
-            logger.info("Successfully updated doctor ID {}: {}", id, updatedDoctor);
-            return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.warn("Doctor not found for update with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Doctor updatedDoctor = doctorService.updateDoctor(id, doctorDetails);
+        logger.info("Successfully updated doctor ID {}: {}", id, updatedDoctor);
+        return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
     }
 
-    // Delete a doctor
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDoctor(@PathVariable Long id) {
         logger.info("Received DELETE request for doctor ID: {}", id);
-        try {
-            doctorService.deleteDoctor(id);
-            logger.info("Successfully deleted doctor ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            logger.warn("Doctor not found for deletion with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        doctorService.deleteDoctor(id);
+        logger.info("Successfully deleted doctor ID: {}", id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/{doctorId}/patients")
@@ -93,13 +86,8 @@ public class DoctorController {
             @PathVariable Long doctorId,
             @RequestBody Patient patient) {
         logger.info("Received POST request to add patient ID {} to doctor ID: {}", patient.getPatientId(), doctorId);
-        try {
-            Doctor updatedDoctor = doctorService.addPatientToDoctor(doctorId, patient.getPatientId());
-            logger.info("Successfully added patient ID {} to doctor ID {}: {}", patient.getPatientId(), doctorId, updatedDoctor);
-            return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.error("Failed to add patient ID {} to doctor ID {}: {}", patient.getPatientId(), doctorId, e.getMessage());
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Doctor updatedDoctor = doctorService.addPatientToDoctor(doctorId, patient.getPatientId());
+        logger.info("Successfully added patient ID {} to doctor ID {}: {}", patient.getPatientId(), doctorId, updatedDoctor);
+        return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
     }
 }

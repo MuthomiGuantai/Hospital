@@ -28,9 +28,14 @@ public class AdmissionsController {
     @PostMapping
     public ResponseEntity<Admissions> createAdmission(@RequestBody Admissions admission) {
         logger.info("Received POST request to create admission: {}", admission);
-        Admissions createdAdmission = admissionsService.createAdmission(admission);
-        logger.info("Successfully created admission: {}", createdAdmission);
-        return new ResponseEntity<>(createdAdmission, HttpStatus.CREATED);
+        try {
+            Admissions createdAdmission = admissionsService.createAdmission(admission);
+            logger.info("Successfully created admission: {}", createdAdmission);
+            return new ResponseEntity<>(createdAdmission, HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error("Failed to create admission: {}", e.getMessage(), e);
+            throw new RuntimeException("Error creating admission: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -43,7 +48,7 @@ public class AdmissionsController {
                 })
                 .orElseGet(() -> {
                     logger.warn("Admission not found for ID: {}", id);
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    throw new RuntimeException("Admission not found for ID: " + id);
                 });
     }
 
@@ -58,9 +63,14 @@ public class AdmissionsController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Admissions>> getAdmissionsByPatientId(@PathVariable Long patientId) {
         logger.info("Received GET request for admissions of patient ID: {}", patientId);
-        List<Admissions> admissions = admissionsService.getAdmissionByPatientId(patientId);
-        logger.info("Successfully retrieved {} admissions for patient ID: {}", admissions.size(), patientId);
-        return new ResponseEntity<>(admissions, HttpStatus.OK);
+        try {
+            List<Admissions> admissions = admissionsService.getAdmissionByPatientId(patientId);
+            logger.info("Successfully retrieved {} admissions for patient ID: {}", admissions.size(), patientId);
+            return new ResponseEntity<>(admissions, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Failed to retrieve admissions for patient ID {}: {}", patientId, e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")

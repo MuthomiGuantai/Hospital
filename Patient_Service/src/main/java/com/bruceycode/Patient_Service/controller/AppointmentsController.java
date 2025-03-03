@@ -28,9 +28,14 @@ public class AppointmentsController {
     @PostMapping
     public ResponseEntity<Appointments> createAppointments(@RequestBody Appointments appointment) {
         logger.info("Received POST request to create appointment: {}", appointment);
-        Appointments createdAppointment = appointmentsService.createAppointments(appointment);
-        logger.info("Successfully created appointment: {}", createdAppointment);
-        return new ResponseEntity<>(createdAppointment, HttpStatus.CREATED);
+        try {
+            Appointments createdAppointment = appointmentsService.createAppointments(appointment);
+            logger.info("Successfully created appointment: {}", createdAppointment);
+            return new ResponseEntity<>(createdAppointment, HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error("Failed to create appointment: {}", e.getMessage(), e);
+            throw new RuntimeException("Error creating appointment: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -43,7 +48,7 @@ public class AppointmentsController {
                 })
                 .orElseGet(() -> {
                     logger.warn("Appointment not found for ID: {}", id);
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    throw new RuntimeException("Appointment not found for ID " + id);
                 });
     }
 
@@ -58,9 +63,14 @@ public class AppointmentsController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Appointments>> getAppointmentsByPatientId(@PathVariable Long patientId) {
         logger.info("Received GET request for appointments of patient ID: {}", patientId);
-        List<Appointments> appointments = appointmentsService.getAppointmentsByPatientId(patientId);
-        logger.info("Successfully retrieved {} appointments for patient ID: {}", appointments.size(), patientId);
-        return new ResponseEntity<>(appointments, HttpStatus.OK);
+        try {
+            List<Appointments> appointments = appointmentsService.getAppointmentsByPatientId(patientId);
+            logger.info("Successfully retrieved {} appointments for patient ID: {}", appointments.size(), patientId);
+            return new ResponseEntity<>(appointments, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Failed to retrieve appointments for patient ID {}: {}", patientId, e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")

@@ -48,7 +48,7 @@ public class DepartmentController {
             return ResponseEntity.ok(department.get());
         } else {
             logger.warn("Department not found for ID: {}", id);
-            return ResponseEntity.notFound().build();
+            throw new RuntimeException("Department not found for ID: " + id);
         }
     }
 

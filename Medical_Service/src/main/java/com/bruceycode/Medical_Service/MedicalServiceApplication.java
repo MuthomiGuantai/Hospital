@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.bruceycode.Medical_Service"})
 @EnableDiscoveryClient
 public class MedicalServiceApplication {
 

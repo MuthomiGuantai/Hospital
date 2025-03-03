@@ -28,9 +28,14 @@ public class MedicalRecordController {
     @PostMapping
     public ResponseEntity<MedicalRecord> createMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
         logger.info("Received POST request to create medical record: {}", medicalRecord);
-        MedicalRecord createdRecord = medicalRecordService.createMedicalRecord(medicalRecord);
-        logger.info("Successfully created medical record: {}", createdRecord);
-        return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
+        try {
+            MedicalRecord createdRecord = medicalRecordService.createMedicalRecord(medicalRecord);
+            logger.info("Successfully created medical record: {}", createdRecord);
+            return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
+        } catch (Exception e) {
+            logger.error("Failed to create medical record: {}", e.getMessage(), e);
+            throw new RuntimeException("Error creating medical record: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
@@ -43,7 +48,7 @@ public class MedicalRecordController {
                 })
                 .orElseGet(() -> {
                     logger.warn("Medical record not found for ID: {}", id);
-                    return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+                    throw new RuntimeException("Medical record not found for ID: " + id);
                 });
     }
 
@@ -58,9 +63,14 @@ public class MedicalRecordController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<MedicalRecord>> getMedicalRecordsByPatientId(@PathVariable Long patientId) {
         logger.info("Received GET request for medical records of patient ID: {}", patientId);
-        List<MedicalRecord> records = medicalRecordService.getMedicalRecordsByPatientId(patientId);
-        logger.info("Successfully retrieved {} medical records for patient ID: {}", records.size(), patientId);
-        return new ResponseEntity<>(records, HttpStatus.OK);
+        try {
+            List<MedicalRecord> records = medicalRecordService.getMedicalRecordsByPatientId(patientId);
+            logger.info("Successfully retrieved {} medical records for patient ID: {}", records.size(), patientId);
+            return new ResponseEntity<>(records, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Failed to retrieve medical records for patient ID {}: {}", patientId, e.getMessage(), e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")

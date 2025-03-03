@@ -33,7 +33,7 @@ logging:
   level:
     com.bruceycode.Medical_Service: DEBUG
     org:
-      springframework: TRACE
+      springframework: DEBUG
       hibernate:
         SQL: DEBUG
         type:
