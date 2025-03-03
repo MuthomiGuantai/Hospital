@@ -32,10 +32,10 @@ public class Doctor {
     @Column
     private String officeLocation;
 
-    @Column(columnDefinition = "TEXT") // For storing JSON or complex schedule data
-    private String schedule; // Could use a separate entity for complex schedules
+    @Column(columnDefinition = "TEXT")
+    private String schedule;
 
-    // Many-to-many with Patient
+
     @ManyToMany
     @JoinTable(
             name = "doctor_patient",
@@ -45,7 +45,6 @@ public class Doctor {
     @JsonManagedReference("patient-doctor")
     private List<Patient> patients = new ArrayList<>();
 
-    // Constructors
     public Doctor() {}
 
     public Doctor(String name, String specialization, String department,
@@ -60,7 +59,6 @@ public class Doctor {
         this.schedule = schedule;
     }
 
-    // Getters and Setters
     public Long getDoctorId() { return doctorId; }
     public void setDoctorId(Long doctorId) { this.doctorId = doctorId; }
     public String getName() { return name; }
@@ -80,7 +78,6 @@ public class Doctor {
     public List<Patient> getPatients() { return patients; }
     public void setPatients(List<Patient> patients) { this.patients = patients; }
 
-    // Helper method for bidirectional relationship
     public void addPatient(Patient patient) {
         patients.add(patient);
         patient.getDoctors().add(this);

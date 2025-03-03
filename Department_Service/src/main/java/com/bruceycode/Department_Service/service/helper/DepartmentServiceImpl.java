@@ -6,9 +6,8 @@ import com.bruceycode.Department_Service.dto.NurseDTO;
 import com.bruceycode.Department_Service.model.Department;
 import com.bruceycode.Department_Service.repository.DepartmentRepository;
 import com.bruceycode.Department_Service.service.DepartmentService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.stereotype.Service;
@@ -19,29 +18,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
-
-    private static final Logger logger = LoggerFactory.getLogger(DepartmentServiceImpl.class);
 
     private final DepartmentRepository departmentRepository;
     private final RestTemplate restTemplate;
     private final LoadBalancerClient loadBalancerClient;
 
-    @Autowired
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository, RestTemplate restTemplate, LoadBalancerClient loadBalancerClient) {
-        this.departmentRepository = departmentRepository;
-        this.restTemplate = restTemplate;
-        this.loadBalancerClient = loadBalancerClient;
-        logger.info("Initialized with RestTemplate: {}", restTemplate.getClass().getName());
-    }
 
     private void validateHeadOfDepartment(Department department) {
         Long headOfDepartment = department.getHeadOfDepartment();
         List<Long> doctors = department.getDoctors();
-        logger.info("Validating headOfDepartment: {} against doctors: {}", headOfDepartment, doctors);
+        log.info("Validating headOfDepartment: {} against doctors: {}", headOfDepartment, doctors);
         if (headOfDepartment != null && (doctors == null || !doctors.contains(headOfDepartment))) {
-            logger.error("Head of Department {} is not in doctors list {}", headOfDepartment, doctors);
+            log.error("Head of Department {} is not in doctors list {}", headOfDepartment, doctors);
             throw new IllegalArgumentException("Head of Department must be one of the doctors in the department");
         }
     }
@@ -52,20 +44,20 @@ public class DepartmentServiceImpl implements DepartmentService {
                 try {
                     ServiceInstance instance = loadBalancerClient.choose("MEDICAL_SERVICE");
                     if (instance == null) {
-                        logger.error("No instance available for MEDICAL_SERVICE");
+                        log.error("No instance available for MEDICAL_SERVICE");
                         throw new IllegalStateException("No MEDICAL_SERVICE instance found in Eureka");
                     }
                     String url = instance.getUri().toString() + "/doctors/" + doctorId;
-                    logger.info("Attempting to validate doctor ID {} with resolved URI: {}", doctorId, url);
+                    log.info("Attempting to validate doctor ID {} with resolved URI: {}", doctorId, url);
                     RestTemplate plainRestTemplate = new RestTemplate();
                     DoctorDTO doctor = plainRestTemplate.getForObject(url, DoctorDTO.class);
                     if (doctor == null) {
-                        logger.error("No doctor found for ID {} at URI: {}", doctorId, url);
+                        log.error("No doctor found for ID {} at URI: {}", doctorId, url);
                         throw new IllegalArgumentException("Doctor with ID " + doctorId + " does not exist in medical_service");
                     }
-                    logger.info("Validated doctor ID {}: {}", doctorId, doctor);
+                    log.info("Validated doctor ID {}: {}", doctorId, doctor);
                 } catch (Exception e) {
-                    logger.error("Failed to validate doctor ID {}: {} - Stacktrace: {}", doctorId, e.getMessage(), e.getStackTrace());
+                    log.error("Failed to validate doctor ID {}: {} - Stacktrace: {}", doctorId, e.getMessage(), e.getStackTrace());
                     throw new IllegalArgumentException("Doctor with ID " + doctorId + " does not exist in medical_service");
                 }
             }
@@ -78,20 +70,20 @@ public class DepartmentServiceImpl implements DepartmentService {
                 try {
                     ServiceInstance instance = loadBalancerClient.choose("MEDICAL_SERVICE");
                     if (instance == null) {
-                        logger.error("No instance available for MEDICAL_SERVICE");
+                        log.error("No instance available for MEDICAL_SERVICE");
                         throw new IllegalStateException("No MEDICAL_SERVICE instance found in Eureka");
                     }
                     String url = instance.getUri().toString() + "/nurses/" + nurseId;
-                    logger.info("Attempting to validate nurse ID {} with resolved URI: {}", nurseId, url);
+                    log.info("Attempting to validate nurse ID {} with resolved URI: {}", nurseId, url);
                     RestTemplate plainRestTemplate = new RestTemplate();
                     NurseDTO nurse = plainRestTemplate.getForObject(url, NurseDTO.class);
                     if (nurse == null) {
-                        logger.error("No nurse found for ID {} at URI: {}", nurseId, url);
+                        log.error("No nurse found for ID {} at URI: {}", nurseId, url);
                         throw new IllegalArgumentException("Nurse with ID " + nurseId + " does not exist in medical_service");
                     }
-                    logger.info("Validated nurse ID {}: {}", nurseId, nurse);
+                    log.info("Validated nurse ID {}: {}", nurseId, nurse);
                 } catch (Exception e) {
-                    logger.error("Failed to validate nurse ID {}: {} - Stacktrace: {}", nurseId, e.getMessage(), e.getStackTrace());
+                    log.error("Failed to validate nurse ID {}: {} - Stacktrace: {}", nurseId, e.getMessage(), e.getStackTrace());
                     throw new IllegalArgumentException("Nurse with ID " + nurseId + " does not exist in medical_service");
                 }
             }
@@ -103,15 +95,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         try {
             ServiceInstance instance = loadBalancerClient.choose("MEDICAL_SERVICE");
             if (instance == null) {
-                logger.error("No instance available for MEDICAL_SERVICE");
+                log.error("No instance available for MEDICAL_SERVICE");
                 return null;
             }
             String url = instance.getUri().toString() + "/doctors/" + doctorId;
             DoctorDTO doctor = restTemplate.getForObject(url, DoctorDTO.class);
-            logger.info("Fetched doctor with ID {}: {}", doctorId, doctor);
+            log.info("Fetched doctor with ID {}: {}", doctorId, doctor);
             return doctor;
         } catch (Exception e) {
-            logger.error("Failed to fetch doctor with ID {}: {}", doctorId, e.getMessage());
+            log.error("Failed to fetch doctor with ID {}: {}", doctorId, e.getMessage());
             return null;
         }
     }
@@ -121,15 +113,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         try {
             ServiceInstance instance = loadBalancerClient.choose("MEDICAL_SERVICE");
             if (instance == null) {
-                logger.error("No instance available for MEDICAL_SERVICE");
+                log.error("No instance available for MEDICAL_SERVICE");
                 return null;
             }
             String url = instance.getUri().toString() + "/nurses/" + nurseId;
             NurseDTO nurse = restTemplate.getForObject(url, NurseDTO.class);
-            logger.info("Fetched nurse with ID {}: {}", nurseId, nurse);
+            log.info("Fetched nurse with ID {}: {}", nurseId, nurse);
             return nurse;
         } catch (Exception e) {
-            logger.error("Failed to fetch nurse with ID {}: {}", nurseId, e.getMessage());
+            log.error("Failed to fetch nurse with ID {}: {}", nurseId, e.getMessage());
             return null;
         }
     }
@@ -155,43 +147,43 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public Department createDepartment(Department department) {
-        logger.info("Creating department: {}", department);
+        log.info("Creating department: {}", department);
         validateHeadOfDepartment(department);
         validateDoctors(department.getDoctors());
         validateNurses(department.getNurses());
         Department savedDepartment = departmentRepository.save(department);
-        logger.info("Successfully created department: {}", savedDepartment);
+        log.info("Successfully created department: {}", savedDepartment);
         return savedDepartment;
     }
 
     @Override
     public Optional<DepartmentDTO> getDepartmentById(Long id) {
-        logger.info("Fetching department by ID: {}", id);
+        log.info("Fetching department by ID: {}", id);
         Optional<Department> department = departmentRepository.findById(id);
         if (department.isPresent()) {
             DepartmentDTO dto = mapToDTO(department.get());
-            logger.info("Successfully fetched department ID {}: {}", id, dto);
+            log.info("Successfully fetched department ID {}: {}", id, dto);
             return Optional.of(dto);
         } else {
-            logger.warn("No department found for ID: {}", id);
+            log.warn("No department found for ID: {}", id);
             return Optional.empty();
         }
     }
 
     @Override
     public List<DepartmentDTO> getAllDepartments() {
-        logger.info("Fetching all the departments");
+        log.info("Fetching all the departments");
         List<Department> departments = departmentRepository.findAll();
         List<DepartmentDTO> dtos = departments.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
-        logger.info("Successfully fetched {} departments", dtos.size());
+        log.info("Successfully fetched {} departments", dtos.size());
         return dtos;
     }
 
     @Override
     public Department updateDepartment(Long id, Department departmentDetails) {
-        logger.info("Updating department ID {} with details: {}", id, departmentDetails);
+        log.info("Updating department ID {} with details: {}", id, departmentDetails);
         Optional<Department> optionalDepartment = departmentRepository.findById(id);
         if (optionalDepartment.isPresent()) {
             Department department = optionalDepartment.get();
@@ -203,21 +195,21 @@ public class DepartmentServiceImpl implements DepartmentService {
             department.setNurses(departmentDetails.getNurses());
             department.setFacilities(departmentDetails.getFacilities());
             Department updatedDepartment = departmentRepository.save(department);
-            logger.info("Successfully updated department ID {}: {}", id, updatedDepartment);
+            log.info("Successfully updated department ID {}: {}", id, updatedDepartment);
             return updatedDepartment;
         }
-        logger.error("Department not found for update with ID: {}", id);
+        log.error("Department not found for update with ID: {}", id);
         throw new RuntimeException("Department not found with ID " + id);
     }
 
     @Override
     public void deleteDepartment(Long id) {
-        logger.info("Deleting department with ID: {}", id);
+        log.info("Deleting department with ID: {}", id);
         if (departmentRepository.existsById(id)) {
             departmentRepository.deleteById(id);
-            logger.info("Successfully deleted department with ID: {}", id);
+            log.info("Successfully deleted department with ID: {}", id);
         } else {
-            logger.error("Department not found for deletion with ID: {}", id);
+            log.error("Department not found for deletion with ID: {}", id);
             throw new RuntimeException("Department not found with ID " + id);
         }
     }

@@ -27,10 +27,9 @@ public class Nurse {
     @Column
     private String contactEmail;
 
-    @Column(columnDefinition = "TEXT") // For storing JSON or complex shift data
-    private String shiftSchedule; // Could use a separate entity for complex schedules
+    @Column(columnDefinition = "TEXT")
+    private String shiftSchedule;
 
-    // Many-to-many with Patient
     @ManyToMany
     @JoinTable(
             name = "nurse_patient",
@@ -40,7 +39,6 @@ public class Nurse {
     @JsonManagedReference("patient-nurse")
     private List<Patient> patients = new ArrayList<>();
 
-    // Constructors
     public Nurse() {}
 
     public Nurse(String name, String department, String contactPhone,
@@ -52,7 +50,6 @@ public class Nurse {
         this.shiftSchedule = shiftSchedule;
     }
 
-    // Getters and Setters
     public Long getNurseId() { return nurseId; }
     public void setNurseId(Long nurseId) { this.nurseId = nurseId; }
     public String getName() { return name; }
@@ -68,7 +65,6 @@ public class Nurse {
     public List<Patient> getPatients() { return patients; }
     public void setPatients(List<Patient> patients) { this.patients = patients; }
 
-    // Helper method for bidirectional relationship
     public void addPatient(Patient patient) {
         patients.add(patient);
         patient.getNurses().add(this);

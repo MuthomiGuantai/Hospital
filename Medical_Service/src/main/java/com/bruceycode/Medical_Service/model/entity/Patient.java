@@ -66,7 +66,6 @@ public class Patient {
     public List<Nurse> getNurses() { return nurses; }
     public void setNurses(List<Nurse> nurses) { this.nurses = nurses; }
 
-    // Helper methods for bidirectional relationship
     public void addDoctor(Doctor doctor) {
         doctors.add(doctor);
         doctor.getPatients().add(this);
