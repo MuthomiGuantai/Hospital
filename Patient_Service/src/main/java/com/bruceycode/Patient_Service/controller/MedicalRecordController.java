@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/medical-records")
@@ -28,28 +29,22 @@ public class MedicalRecordController {
     @PostMapping
     public ResponseEntity<MedicalRecord> createMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
         logger.info("Received POST request to create medical record: {}", medicalRecord);
-        try {
-            MedicalRecord createdRecord = medicalRecordService.createMedicalRecord(medicalRecord);
-            logger.info("Successfully created medical record: {}", createdRecord);
-            return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error("Failed to create medical record: {}", e.getMessage(), e);
-            throw new RuntimeException("Error creating medical record: " + e.getMessage());
-        }
+        MedicalRecord createdRecord = medicalRecordService.createMedicalRecord(medicalRecord);
+        logger.info("Successfully created medical record: {}", createdRecord);
+        return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<MedicalRecord> getMedicalRecordById(@PathVariable Long id) {
         logger.info("Received GET request for medical record ID: {}", id);
-        return medicalRecordService.getMedicalRecordById(id)
-                .map(record -> {
-                    logger.info("Successfully retrieved medical record ID {}: {}", id, record);
-                    return new ResponseEntity<>(record, HttpStatus.OK);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Medical record not found for ID: {}", id);
-                    throw new RuntimeException("Medical record not found for ID: " + id);
-                });
+        Optional<MedicalRecord> record = medicalRecordService.getMedicalRecordById(id);
+        if (record.isPresent()) {
+            logger.info("Successfully retrieved medical record ID {}: {}", id, record.get());
+            return new ResponseEntity<>(record.get(), HttpStatus.OK);
+        } else {
+            logger.warn("Medical record not found for ID: {}", id);
+            throw new RuntimeException("Medical record not found for ID: " + id);
+        }
     }
 
     @GetMapping
@@ -63,39 +58,24 @@ public class MedicalRecordController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<MedicalRecord>> getMedicalRecordsByPatientId(@PathVariable Long patientId) {
         logger.info("Received GET request for medical records of patient ID: {}", patientId);
-        try {
-            List<MedicalRecord> records = medicalRecordService.getMedicalRecordsByPatientId(patientId);
-            logger.info("Successfully retrieved {} medical records for patient ID: {}", records.size(), patientId);
-            return new ResponseEntity<>(records, HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("Failed to retrieve medical records for patient ID {}: {}", patientId, e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<MedicalRecord> records = medicalRecordService.getMedicalRecordsByPatientId(patientId);
+        logger.info("Successfully retrieved {} medical records for patient ID: {}", records.size(), patientId);
+        return new ResponseEntity<>(records, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<MedicalRecord> updateMedicalRecord(@PathVariable Long id, @RequestBody MedicalRecord medicalRecord) {
         logger.info("Received PUT request to update medical record ID {} with details: {}", id, medicalRecord);
-        try {
-            MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(id, medicalRecord);
-            logger.info("Successfully updated medical record ID {}: {}", id, updatedRecord);
-            return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.warn("Medical record not found for update with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(id, medicalRecord);
+        logger.info("Successfully updated medical record ID {}: {}", id, updatedRecord);
+        return new ResponseEntity<>(updatedRecord, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMedicalRecord(@PathVariable Long id) {
         logger.info("Received DELETE request for medical record ID: {}", id);
-        try {
-            medicalRecordService.deleteMedicalRecord(id);
-            logger.info("Successfully deleted medical record ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            logger.warn("Medical record not found for deletion with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        medicalRecordService.deleteMedicalRecord(id);
+        logger.info("Successfully deleted medical record ID: {}", id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

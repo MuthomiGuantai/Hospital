@@ -1,5 +1,6 @@
 package com.bruceycode.Patient_Service.controller;
 
+import com.bruceycode.Patient_Service.exception.NotFoundException;
 import com.bruceycode.Patient_Service.model.Admissions;
 import com.bruceycode.Patient_Service.service.AdmissionsService;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/admissions")
@@ -28,28 +30,22 @@ public class AdmissionsController {
     @PostMapping
     public ResponseEntity<Admissions> createAdmission(@RequestBody Admissions admission) {
         logger.info("Received POST request to create admission: {}", admission);
-        try {
-            Admissions createdAdmission = admissionsService.createAdmission(admission);
-            logger.info("Successfully created admission: {}", createdAdmission);
-            return new ResponseEntity<>(createdAdmission, HttpStatus.CREATED);
-        } catch (Exception e) {
-            logger.error("Failed to create admission: {}", e.getMessage(), e);
-            throw new RuntimeException("Error creating admission: " + e.getMessage());
-        }
+        Admissions createdAdmission = admissionsService.createAdmission(admission);
+        logger.info("Successfully created admission: {}", createdAdmission);
+        return new ResponseEntity<>(createdAdmission, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Admissions> getAdmissionById(@PathVariable Long id) {
         logger.info("Received GET request for admission ID: {}", id);
-        return admissionsService.getAdmissionById(id)
-                .map(admission -> {
-                    logger.info("Successfully retrieved admission ID {}: {}", id, admission);
-                    return new ResponseEntity<>(admission, HttpStatus.OK);
-                })
-                .orElseGet(() -> {
-                    logger.warn("Admission not found for ID: {}", id);
-                    throw new RuntimeException("Admission not found for ID: " + id);
-                });
+        Optional<Admissions> admission = admissionsService.getAdmissionById(id);
+        if (admission.isPresent()) {
+            logger.info("Successfully retrieved admission ID {}: {}", id, admission.get());
+            return new ResponseEntity<>(admission.get(), HttpStatus.OK);
+        } else {
+            logger.warn("Admission not found for ID: {}", id);
+            throw new NotFoundException("Admission not found with ID: " + id);
+        }
     }
 
     @GetMapping
@@ -63,39 +59,24 @@ public class AdmissionsController {
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Admissions>> getAdmissionsByPatientId(@PathVariable Long patientId) {
         logger.info("Received GET request for admissions of patient ID: {}", patientId);
-        try {
-            List<Admissions> admissions = admissionsService.getAdmissionByPatientId(patientId);
-            logger.info("Successfully retrieved {} admissions for patient ID: {}", admissions.size(), patientId);
-            return new ResponseEntity<>(admissions, HttpStatus.OK);
-        } catch (Exception e) {
-            logger.error("Failed to retrieve admissions for patient ID {}: {}", patientId, e.getMessage(), e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        List<Admissions> admissions = admissionsService.getAdmissionByPatientId(patientId);
+        logger.info("Successfully retrieved {} admissions for patient ID: {}", admissions.size(), patientId);
+        return new ResponseEntity<>(admissions, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Admissions> updateAdmission(@PathVariable Long id, @RequestBody Admissions admission) {
         logger.info("Received PUT request to update admission ID {} with details: {}", id, admission);
-        try {
-            Admissions updatedAdmission = admissionsService.updateAdmission(id, admission);
-            logger.info("Successfully updated admission ID {}: {}", id, updatedAdmission);
-            return new ResponseEntity<>(updatedAdmission, HttpStatus.OK);
-        } catch (RuntimeException e) {
-            logger.warn("Admission not found for update with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Admissions updatedAdmission = admissionsService.updateAdmission(id, admission);
+        logger.info("Successfully updated admission ID {}: {}", id, updatedAdmission);
+        return new ResponseEntity<>(updatedAdmission, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdmission(@PathVariable Long id) {
         logger.info("Received DELETE request for admission ID: {}", id);
-        try {
-            admissionsService.deleteAdmission(id);
-            logger.info("Successfully deleted admission ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (RuntimeException e) {
-            logger.warn("Admission not found for deletion with ID: {}", id);
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        admissionsService.deleteAdmission(id);
+        logger.info("Successfully deleted admission ID: {}", id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
