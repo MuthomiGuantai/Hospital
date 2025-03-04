@@ -65,7 +65,7 @@ public class DoctorServiceImpl implements DoctorService {
             doctor.setContactEmail(doctorDetails.getContactEmail());
             doctor.setOfficeLocation(doctorDetails.getOfficeLocation());
             doctor.setSchedule(doctorDetails.getSchedule());
-            // Note: Patients relationship needs special handling if you're updating it
+            // Patients relationship needs special handling if you're updating it
             Doctor updatedDoctor = doctorRepository.save(doctor);
             log.info("Successfully updated doctor ID {}: {}", id, updatedDoctor);
             return updatedDoctor;

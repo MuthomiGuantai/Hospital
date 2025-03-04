@@ -63,7 +63,7 @@ public class PatientServiceImpl implements PatientService {
             patient.setPhone_number(patientDetails.getPhone_number());
             patient.setGender(patientDetails.getGender());
             patient.setDob(patientDetails.getDob());
-            // Note: Doctors and Nurses relationships are managed separately
+            // Doctors and Nurses relationships are managed separately
             Patient updatedPatient = patientRepository.save(patient);
             log.info("Successfully updated patient ID {}: {}", id, updatedPatient);
             return updatedPatient;

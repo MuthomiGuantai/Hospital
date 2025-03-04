@@ -47,7 +47,6 @@ public class DoctorController {
         }
     }
 
-
     @GetMapping
     public ResponseEntity<List<Doctor>> getAllDoctors() {
         log.info("Received GET request for all doctors");
@@ -55,7 +54,6 @@ public class DoctorController {
         log.info("Successfully retrieved {} doctors", doctors.size());
         return new ResponseEntity<>(doctors, HttpStatus.OK);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> updateDoctor(@PathVariable Long id,

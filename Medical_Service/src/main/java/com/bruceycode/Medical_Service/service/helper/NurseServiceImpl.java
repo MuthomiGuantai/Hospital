@@ -64,7 +64,7 @@ public class NurseServiceImpl implements NurseService {
             nurse.setContactPhone(nurseDetails.getContactPhone());
             nurse.setContactEmail(nurseDetails.getContactEmail());
             nurse.setShiftSchedule(nurseDetails.getShiftSchedule());
-            // Note: Patients relationship needs special handling if updating
+            // Patients relationship needs special handling if updating
             Nurse updatedNurse = nurseRepository.save(nurse);
             log.info("Successfully updated nurse ID {}: {}", id, updatedNurse);
             return updatedNurse;

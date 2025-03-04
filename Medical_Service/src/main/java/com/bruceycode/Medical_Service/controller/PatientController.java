@@ -5,6 +5,7 @@ import com.bruceycode.Medical_Service.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class PatientController {
 
     private final PatientService patientService;
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
         log.info("Received POST request to create patient: {}", patient);
         if (patient.getName() == null || patient.getName().trim().isEmpty()) {
