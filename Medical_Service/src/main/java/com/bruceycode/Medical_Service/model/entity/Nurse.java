@@ -20,6 +20,9 @@ public class Nurse {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String username;
+
     @Column
     private String department;
 
@@ -38,7 +41,7 @@ public class Nurse {
             joinColumns = @JoinColumn(name = "nurse_id"),
             inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
-    @JsonManagedReference("nurse-patient")
+    /*@JsonManagedReference("nurse-patient")*/
     private List<Patient> patients = new ArrayList<>();
 
     public Nurse() {}

@@ -8,17 +8,16 @@ spring:
     import: "optional:configserver:http://localhost:8104"
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/MedStaff
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Medical
     username: root
     password: Clearme@1824
     driver-class-name: com.mysql.cj.jdbc.Driver
   application:
     name: medical_service
-
 
 eureka:
   client:
@@ -40,3 +39,5 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+jwt:
+  secret: d5BNg9BhIWzwY09+R2fss4iBEvoNd+eAqHU7o1BouK4=

@@ -19,6 +19,9 @@ public class Doctor {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String username;
+
     @Column
     private String specialization;
 
@@ -44,7 +47,7 @@ public class Doctor {
             joinColumns = @JoinColumn(name = "doctor_id"),
             inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
-    @JsonManagedReference("patient-doctor")
+    /*@JsonManagedReference("patient-doctor")*/
     private List<Patient> patients = new ArrayList<>();
 
     public Doctor() {}

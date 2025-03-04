@@ -38,7 +38,7 @@ public class Patient {
 
 
     @ManyToMany(mappedBy = "patients")
-    @JsonBackReference("nurse-patient")
+    /*@JsonBackReference("nurse-patient")*/
     private List<Nurse> nurses = new ArrayList<>();
 
     public Patient() {}
