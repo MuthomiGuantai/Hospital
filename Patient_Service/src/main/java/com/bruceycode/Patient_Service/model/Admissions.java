@@ -1,12 +1,14 @@
 package com.bruceycode.Patient_Service.model;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "admissions")
-@Data
 public class Admissions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,14 +29,4 @@ public class Admissions {
         this.reason = reason;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public Long getPatientId() { return patientId; }
-    public void setPatientId(Long patientId) { this.patientId = patientId; }
-    public LocalDate getAdmissionDate() { return admissionDate; }
-    public void setAdmissionDate(LocalDate admissionDate) { this.admissionDate = admissionDate; }
-    public LocalDate getDischargeDate() { return dischargeDate; }
-    public void setDischargeDate(LocalDate dischargeDate) { this.dischargeDate = dischargeDate; }
-    public String getReason() { return reason; }
-    public void setReason(String reason) { this.reason = reason; }
 }

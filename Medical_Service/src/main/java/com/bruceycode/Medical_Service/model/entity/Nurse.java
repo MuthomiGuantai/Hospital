@@ -2,14 +2,16 @@ package com.bruceycode.Medical_Service.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "nurses")
-@Data
 public class Nurse {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +38,7 @@ public class Nurse {
             joinColumns = @JoinColumn(name = "nurse_id"),
             inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
-    @JsonManagedReference("patient-nurse")
+    @JsonManagedReference("nurse-patient")
     private List<Patient> patients = new ArrayList<>();
 
     public Nurse() {}
@@ -49,21 +51,6 @@ public class Nurse {
         this.contactEmail = contactEmail;
         this.shiftSchedule = shiftSchedule;
     }
-
-    public Long getNurseId() { return nurseId; }
-    public void setNurseId(Long nurseId) { this.nurseId = nurseId; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
-    public String getContactPhone() { return contactPhone; }
-    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
-    public String getContactEmail() { return contactEmail; }
-    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
-    public String getShiftSchedule() { return shiftSchedule; }
-    public void setShiftSchedule(String shiftSchedule) { this.shiftSchedule = shiftSchedule; }
-    public List<Patient> getPatients() { return patients; }
-    public void setPatients(List<Patient> patients) { this.patients = patients; }
 
     public void addPatient(Patient patient) {
         patients.add(patient);

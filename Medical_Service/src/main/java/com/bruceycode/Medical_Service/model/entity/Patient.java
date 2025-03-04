@@ -1,15 +1,17 @@
 package com.bruceycode.Medical_Service.model.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "patients")
-@Data
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +38,7 @@ public class Patient {
 
 
     @ManyToMany(mappedBy = "patients")
-    @JsonBackReference("patient-nurse")
+    @JsonBackReference("nurse-patient")
     private List<Nurse> nurses = new ArrayList<>();
 
     public Patient() {}
@@ -48,23 +50,6 @@ public class Patient {
         this.phone_number = phone_number;
         this.dob = dob;
     }
-
-    public Long getPatientId() { return patientId; }
-    public void setPatientId(Long patientId) { this.patientId = patientId; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getGender() {return gender;}
-    public void setGender(String gender) {this.gender = gender;}
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public Integer getPhone_number() {return phone_number;}
-    public void setPhone_number(Integer phone_number) {this.phone_number = phone_number;}
-    public LocalDate getDob() {return dob;}
-    public void setDob(LocalDate dob) {this.dob = dob;}
-    public List<Doctor> getDoctors() { return doctors; }
-    public void setDoctors(List<Doctor> doctors) { this.doctors = doctors; }
-    public List<Nurse> getNurses() { return nurses; }
-    public void setNurses(List<Nurse> nurses) { this.nurses = nurses; }
 
     public void addDoctor(Doctor doctor) {
         doctors.add(doctor);

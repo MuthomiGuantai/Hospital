@@ -2,13 +2,14 @@ package com.bruceycode.Department_Service.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "departments")
-@Data
 public class Department {
 
     @Id
@@ -50,48 +51,24 @@ public class Department {
         this.facilities = facilities != null ? new ArrayList<>(facilities) : new ArrayList<>();
     }
 
-    public Long getDepartmentId() {
-        return departmentId;
-    }
-
     public void setDepartmentId(Long departmentId) {
         this.departmentId = departmentId;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public Long getHeadOfDepartment() {
-        return headOfDepartment;
-    }
-
     public void setHeadOfDepartment(Long headOfDepartment) {
         this.headOfDepartment = headOfDepartment;
-    }
-
-    public List<Long> getDoctors() {
-        return doctors;
     }
 
     public void setDoctors(List<Long> doctors) {
         this.doctors = doctors != null ? new ArrayList<>(doctors) : new ArrayList<>();
     }
 
-    public List<Long> getNurses() {
-        return nurses;
-    }
-
     public void setNurses(List<Long> nurses) {
         this.nurses = nurses != null ? new ArrayList<>(nurses) : new ArrayList<>();
-    }
-
-    public List<String> getFacilities() {
-        return facilities;
     }
 
     public void setFacilities(List<String> facilities) {
