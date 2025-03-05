@@ -1,6 +1,7 @@
 package com.bruceycode.Medical_Service.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,13 +36,13 @@ public class Nurse {
     @Column(columnDefinition = "TEXT")
     private String shiftSchedule;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "nurse_patient",
             joinColumns = @JoinColumn(name = "nurse_id"),
             inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
-    /*@JsonManagedReference("nurse-patient")*/
+    @JsonManagedReference("nurse-patient")
     private List<Patient> patients = new ArrayList<>();
 
     public Nurse() {}

@@ -1,7 +1,6 @@
 package com.bruceycode.Medical_Service.controller;
 
-import com.bruceycode.Medical_Service.model.entity.Doctor;
-import com.bruceycode.Medical_Service.model.entity.Patient;
+import com.bruceycode.Medical_Service.dto.medical_services.DoctorDTO;
 import com.bruceycode.Medical_Service.service.DoctorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,23 +20,21 @@ public class DoctorController {
 
     private final DoctorService doctorService;
 
-
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Doctor> createDoctor(@RequestBody Doctor doctor) {
-        log.info("Received POST request to create doctor: {}", doctor);
-        if (doctor.getName() == null || doctor.getName().trim().isEmpty()) {
+    public ResponseEntity<DoctorDTO> createDoctor(@RequestBody DoctorDTO doctorDTO) {
+        log.info("Received POST request to create doctor: {}", doctorDTO);
+        if (doctorDTO.getName() == null || doctorDTO.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Doctor name cannot be null or empty");
         }
-        Doctor createdDoctor = doctorService.createDoctor(doctor);
+        DoctorDTO createdDoctor = doctorService.createDoctor(doctorDTO);
         log.info("Successfully created doctor: {}", createdDoctor);
         return new ResponseEntity<>(createdDoctor, HttpStatus.CREATED);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Doctor> getDoctorById(@PathVariable Long id) {
+    public ResponseEntity<DoctorDTO> getDoctorById(@PathVariable Long id) {
         log.info("Received GET request for doctor ID: {}", id);
-        Optional<Doctor> doctor = doctorService.getDoctorById(id);
+        Optional<DoctorDTO> doctor = doctorService.getDoctorById(id, true); // Always include patients
         if (doctor.isPresent()) {
             log.info("Successfully retrieved doctor ID {}: {}", id, doctor.get());
             return new ResponseEntity<>(doctor.get(), HttpStatus.OK);
@@ -48,18 +45,17 @@ public class DoctorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Doctor>> getAllDoctors() {
+    public ResponseEntity<List<DoctorDTO>> getAllDoctors() {
         log.info("Received GET request for all doctors");
-        List<Doctor> doctors = doctorService.getAllDoctors();
+        List<DoctorDTO> doctors = doctorService.getAllDoctors(true); // Always include patients
         log.info("Successfully retrieved {} doctors", doctors.size());
         return new ResponseEntity<>(doctors, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Doctor> updateDoctor(@PathVariable Long id,
-                                               @RequestBody Doctor doctorDetails) {
+    public ResponseEntity<DoctorDTO> updateDoctor(@PathVariable Long id, @RequestBody DoctorDTO doctorDetails) {
         log.info("Received PUT request to update doctor ID {} with details: {}", id, doctorDetails);
-        Doctor updatedDoctor = doctorService.updateDoctor(id, doctorDetails);
+        DoctorDTO updatedDoctor = doctorService.updateDoctor(id, doctorDetails);
         log.info("Successfully updated doctor ID {}: {}", id, updatedDoctor);
         return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
     }
@@ -72,13 +68,11 @@ public class DoctorController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/{doctorId}/patients")
-    public ResponseEntity<Doctor> addPatientToDoctor(
-            @PathVariable Long doctorId,
-            @RequestBody Patient patient) {
-        log.info("Received POST request to add patient ID {} to doctor ID: {}", patient.getPatientId(), doctorId);
-        Doctor updatedDoctor = doctorService.addPatientToDoctor(doctorId, patient.getPatientId());
-        log.info("Successfully added patient ID {} to doctor ID {}: {}", patient.getPatientId(), doctorId, updatedDoctor);
+    @PostMapping("/{doctorId}/patients/{patientId}")
+    public ResponseEntity<DoctorDTO> addPatientToDoctor(@PathVariable Long doctorId, @PathVariable Long patientId) {
+        log.info("Received POST request to add patient ID {} to doctor ID: {}", patientId, doctorId);
+        DoctorDTO updatedDoctor = doctorService.addPatientToDoctor(doctorId, patientId);
+        log.info("Successfully added patient ID {} to doctor ID {}: {}", patientId, doctorId, updatedDoctor);
         return new ResponseEntity<>(updatedDoctor, HttpStatus.OK);
     }
 }

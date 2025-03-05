@@ -1,15 +1,16 @@
 package com.bruceycode.Medical_Service.service;
 
-import com.bruceycode.Medical_Service.model.entity.Doctor;
+import com.bruceycode.Medical_Service.dto.medical_services.DoctorDTO;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface DoctorService {
-    Doctor createDoctor(Doctor doctor);
-    Optional<Doctor> getDoctorById(Long id);
-    List<Doctor> getAllDoctors();
-    Doctor updateDoctor(Long id, Doctor doctorDetails);
+    DoctorDTO createDoctor(DoctorDTO doctorDTO);
+    Optional<DoctorDTO> getDoctorById(Long id, boolean includePatients);
+    List<DoctorDTO> getAllDoctors(); // Existing method
+    List<DoctorDTO> getAllDoctors(boolean includePatients); // New method
+    DoctorDTO updateDoctor(Long id, DoctorDTO doctorDetails);
     void deleteDoctor(Long id);
-    Doctor addPatientToDoctor(Long doctorId, Long patientId);
+    DoctorDTO addPatientToDoctor(Long doctorId, Long patientId);
 }
-

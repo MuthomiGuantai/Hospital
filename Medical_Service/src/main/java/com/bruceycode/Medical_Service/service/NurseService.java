@@ -1,18 +1,16 @@
 package com.bruceycode.Medical_Service.service;
 
-// Service Interface
-import com.bruceycode.Medical_Service.model.entity.Nurse;
+import com.bruceycode.Medical_Service.dto.medical_services.NurseDTO;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface NurseService {
-    Nurse createNurse(Nurse nurse);
-    Optional<Nurse> getNurseById(Long id);
-    List<Nurse> getAllNurses();
-    Nurse updateNurse(Long id, Nurse nurseDetails);
+    NurseDTO createNurse(NurseDTO nurseDTO);
+    Optional<NurseDTO> getNurseById(Long id, boolean includePatients);
+    List<NurseDTO> getAllNurses(); // Existing method
+    List<NurseDTO> getAllNurses(boolean includePatients); // New method
+    NurseDTO updateNurse(Long id, NurseDTO nurseDetails);
     void deleteNurse(Long id);
-    Nurse addPatientToNurse(Long nurseId, Long patientId);
+    NurseDTO addPatientToNurse(Long nurseId, Long patientId);
 }
-
-// Service Implementation
-

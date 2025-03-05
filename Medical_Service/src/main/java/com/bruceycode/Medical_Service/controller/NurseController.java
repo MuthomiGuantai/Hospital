@@ -1,7 +1,6 @@
 package com.bruceycode.Medical_Service.controller;
 
-import com.bruceycode.Medical_Service.model.entity.Nurse;
-import com.bruceycode.Medical_Service.model.entity.Patient;
+import com.bruceycode.Medical_Service.dto.medical_services.NurseDTO;
 import com.bruceycode.Medical_Service.service.NurseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,26 +18,23 @@ import java.util.Optional;
 @RequestMapping("/nurses")
 public class NurseController {
 
-
     private final NurseService nurseService;
 
-
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Nurse> createNurse(@RequestBody Nurse nurse) {
-        log.info("Received POST request to create nurse: {}", nurse);
-        if (nurse.getName() == null || nurse.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Patient name cannot be null or empty");
+    public ResponseEntity<NurseDTO> createNurse(@RequestBody NurseDTO nurseDTO) {
+        log.info("Received POST request to create nurse: {}", nurseDTO);
+        if (nurseDTO.getName() == null || nurseDTO.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Nurse name cannot be null or empty");
         }
-        Nurse createdNurse = nurseService.createNurse(nurse);
+        NurseDTO createdNurse = nurseService.createNurse(nurseDTO);
         log.info("Successfully created nurse: {}", createdNurse);
         return new ResponseEntity<>(createdNurse, HttpStatus.CREATED);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Nurse> getNurseById(@PathVariable Long id) {
+    public ResponseEntity<NurseDTO> getNurseById(@PathVariable Long id) {
         log.info("Received GET request for nurse ID: {}", id);
-        Optional<Nurse> nurse = nurseService.getNurseById(id);
+        Optional<NurseDTO> nurse = nurseService.getNurseById(id, true); // Always include patients
         if (nurse.isPresent()) {
             log.info("Successfully retrieved nurse ID {}: {}", id, nurse.get());
             return new ResponseEntity<>(nurse.get(), HttpStatus.OK);
@@ -49,22 +45,20 @@ public class NurseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Nurse>> getAllNurses() {
+    public ResponseEntity<List<NurseDTO>> getAllNurses() {
         log.info("Received GET request for all nurses");
-        List<Nurse> nurses = nurseService.getAllNurses();
+        List<NurseDTO> nurses = nurseService.getAllNurses(true); // Always include patients
         log.info("Successfully retrieved {} nurses", nurses.size());
         return new ResponseEntity<>(nurses, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Nurse> updateNurse(@PathVariable Long id,
-                                             @RequestBody Nurse nurseDetails) {
+    public ResponseEntity<NurseDTO> updateNurse(@PathVariable Long id, @RequestBody NurseDTO nurseDetails) {
         log.info("Received PUT request to update nurse ID {} with details: {}", id, nurseDetails);
-        Nurse updatedNurse = nurseService.updateNurse(id, nurseDetails);
+        NurseDTO updatedNurse = nurseService.updateNurse(id, nurseDetails);
         log.info("Successfully updated nurse ID {}: {}", id, updatedNurse);
         return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNurse(@PathVariable Long id) {
@@ -74,13 +68,11 @@ public class NurseController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/{nurseId}/patients")
-    public ResponseEntity<Nurse> addPatientToNurse(
-            @PathVariable Long nurseId,
-            @RequestBody Patient patient) {
-        log.info("Received POST request to add patient ID {} to nurse ID: {}", patient.getPatientId(), nurseId);
-        Nurse updatedNurse = nurseService.addPatientToNurse(nurseId, patient.getPatientId());
-        log.info("Successfully added patient ID {} to nurse ID {}: {}", patient.getPatientId(), nurseId, updatedNurse);
+    @PostMapping("/{nurseId}/patients/{patientId}")
+    public ResponseEntity<NurseDTO> addPatientToNurse(@PathVariable Long nurseId, @PathVariable Long patientId) {
+        log.info("Received POST request to add patient ID {} to nurse ID: {}", patientId, nurseId);
+        NurseDTO updatedNurse = nurseService.addPatientToNurse(nurseId, patientId);
+        log.info("Successfully added patient ID {} to nurse ID {}: {}", patientId, nurseId, updatedNurse);
         return new ResponseEntity<>(updatedNurse, HttpStatus.OK);
     }
 }
