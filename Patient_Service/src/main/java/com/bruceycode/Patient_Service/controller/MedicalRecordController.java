@@ -1,5 +1,6 @@
 package com.bruceycode.Patient_Service.controller;
 
+import com.bruceycode.Patient_Service.dto.MedicalRecordDTO;
 import com.bruceycode.Patient_Service.model.MedicalRecord;
 import com.bruceycode.Patient_Service.service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,14 @@ public class MedicalRecordController {
     private final MedicalRecordService medicalRecordService;
 
     @PostMapping
-    public ResponseEntity<MedicalRecord> createMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
-        log.info("Received POST request to create medical record: {}", medicalRecord);
+    public ResponseEntity<MedicalRecord> createMedicalRecord(@RequestBody MedicalRecordDTO medicalRecordDTO) {
+        log.info("Received POST request to create medical record: {}", medicalRecordDTO);
+        MedicalRecord medicalRecord = new MedicalRecord();
+        medicalRecord.setPatientId(medicalRecordDTO.getPatientId());
+        medicalRecord.setDoctorId(medicalRecordDTO.getDoctorId());
+        medicalRecord.setCondition(medicalRecordDTO.getCondition());
+        medicalRecord.setDiagnosisDate(medicalRecordDTO.getDiagnosisDate());
+        medicalRecord.setNotes(medicalRecordDTO.getNotes());
         MedicalRecord createdRecord = medicalRecordService.createMedicalRecord(medicalRecord);
         log.info("Successfully created medical record: {}", createdRecord);
         return new ResponseEntity<>(createdRecord, HttpStatus.CREATED);

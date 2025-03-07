@@ -1,18 +1,8 @@
 package com.bruceycode.Medical_Service;
 
-import com.bruceycode.Medical_Service.model.entity.Doctor;
-import com.bruceycode.Medical_Service.model.entity.Nurse;
-import com.bruceycode.Medical_Service.model.entity.User;
-import com.bruceycode.Medical_Service.model.entity.UserRole;
-import com.bruceycode.Medical_Service.repository.DoctorRepository;
-import com.bruceycode.Medical_Service.repository.NurseRepository;
-import com.bruceycode.Medical_Service.repository.UserRepository;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,7 +14,7 @@ public class MedicalServiceApplication {
 		SpringApplication.run(MedicalServiceApplication.class, args);
 	}
 
-	@Bean
+	/*@Bean
 	public CommandLineRunner loadData(UserRepository userRepository, DoctorRepository doctorRepository,
 									  NurseRepository nurseRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
@@ -69,5 +59,5 @@ public class MedicalServiceApplication {
 			nurse.setShiftSchedule("Morning Shift");
 			nurseRepository.save(nurse);
 		};
-	}
+	}*/ //creating startup users for testing
 }

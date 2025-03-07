@@ -29,6 +29,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     }
 
     private void validatePatientExists(Long patientId) {
+        if (patientId == null) {
+            log.error("Patient ID is null during validation");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         log.info("Validating patient ID: {}", patientId);
         try {
             restTemplate.getForObject(getMedicalServiceUrl() + "/patients/" + patientId, Object.class);
@@ -57,6 +61,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     public MedicalRecord createMedicalRecord(MedicalRecord medicalRecord) {
         log.info("Creating medical record: {}", medicalRecord);
+        if (medicalRecord.getPatientId() == null) {
+            log.error("Patient ID is null in medical record: {}", medicalRecord);
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         validatePatientExists(medicalRecord.getPatientId());
         validateDoctorExists(medicalRecord.getDoctorId());
         MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);

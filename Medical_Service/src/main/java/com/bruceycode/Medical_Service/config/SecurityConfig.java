@@ -2,9 +2,11 @@ package com.bruceycode.Medical_Service.config;
 
 import com.bruceycode.Medical_Service.service.helper.UserDetailsServiceImpl;
 import com.bruceycode.Medical_Service.util.JwtAuthenticationFilter;
+import jakarta.ws.rs.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;

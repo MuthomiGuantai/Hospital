@@ -34,6 +34,10 @@ public class PatientController {
     @GetMapping("/{id}")
     public ResponseEntity<PatientDTO> getPatientById(@PathVariable Long id) {
         log.info("Received GET request for patient ID: {}", id);
+        if (id == null) {
+            log.error("Patient ID is null in GET request");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         Optional<PatientDTO> patient = patientService.getPatientById(id);
         if (patient.isPresent()) {
             log.info("Successfully retrieved patient ID {}: {}", id, patient.get());
