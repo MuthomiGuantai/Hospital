@@ -19,6 +19,9 @@ spring:
   application:
     name: medical_service
 
+springdoc:
+  packages-to-scan: com.bruceycode.Medical_Service
+
 eureka:
   client:
     service-url:

@@ -15,15 +15,16 @@ public class PatientDTO {
     private String name;
     private String gender;
     private String email;
-    private Integer phone_number;
+    private String phone_number;
     private LocalDate dob;
     private List<Long> doctorIds = new ArrayList<>();
     private List<Long> nurseIds = new ArrayList<>();
 
+
     public PatientDTO() {
     }
 
-    public PatientDTO(Long patientId, String name, String gender, String email, Integer phone_number, LocalDate dob, List<Long> doctorIds, List<Long> nurseIds) {
+    public PatientDTO(Long patientId, String name, String gender, String email, String phone_number, LocalDate dob, List<Long> doctorIds, List<Long> nurseIds) {
         this.patientId = patientId;
         this.name = name;
         this.gender = gender;
@@ -33,4 +34,5 @@ public class PatientDTO {
         this.doctorIds = doctorIds;
         this.nurseIds = nurseIds;
     }
+
 }

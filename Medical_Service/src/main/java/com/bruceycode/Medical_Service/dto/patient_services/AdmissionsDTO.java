@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public class AdmissionsDTO {
     private Long Id;
     private Long patientId;
+    private Long doctorId;
     private LocalDate admissionDate;
     private LocalDate dischargeDate;
     private String reason;
@@ -16,9 +17,10 @@ public class AdmissionsDTO {
     public AdmissionsDTO() {
     }
 
-    public AdmissionsDTO(Long id, Long patientId, LocalDate admissionDate, LocalDate dischargeDate, String reason) {
+    public AdmissionsDTO(Long id, Long patientId, Long doctorId, LocalDate admissionDate, LocalDate dischargeDate, String reason) {
         Id = id;
         this.patientId = patientId;
+        this.doctorId = doctorId;
         this.admissionDate = admissionDate;
         this.dischargeDate = dischargeDate;
         this.reason = reason;

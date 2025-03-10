@@ -9,6 +9,10 @@ import java.time.LocalDate;
 @Getter
 public class AppointmentsDTO {
     private Long Id;
+
+    @Setter
+    @Getter
+    private Long patientId;
     private Long doctorId;
     private Long nurseId;
     private LocalDate appointmentDate;
@@ -17,8 +21,9 @@ public class AppointmentsDTO {
     public AppointmentsDTO() {
     }
 
-    public AppointmentsDTO(Long id, Long doctorId, Long nurseId, LocalDate appointmentDate, String reason) {
+    public AppointmentsDTO(Long id, Long patientId, Long doctorId, Long nurseId, LocalDate appointmentDate, String reason) {
         Id = id;
+        this.patientId = patientId;
         this.doctorId = doctorId;
         this.nurseId = nurseId;
         this.appointmentDate = appointmentDate;

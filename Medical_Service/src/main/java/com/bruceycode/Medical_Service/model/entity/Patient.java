@@ -27,7 +27,7 @@ public class Patient {
     private String email;
 
     @Column
-    private Integer phone_number;
+    private String phone_number;
 
     @Column
     private LocalDate dob;
@@ -43,7 +43,7 @@ public class Patient {
 
     public Patient() {}
 
-    public Patient(String name, String gender, String email, Integer phone_number, LocalDate dob) {
+    public Patient(String name, String gender, String email, String phone_number, LocalDate dob) {
         this.name = name;
         this.gender = gender;
         this.email = email;
