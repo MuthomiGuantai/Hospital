@@ -1,8 +1,9 @@
-package com.bruceycode.Medical_Service.dto.patient_services;
+package com.bruceycode.Patient_Service.dto;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDate;
 
 @Setter

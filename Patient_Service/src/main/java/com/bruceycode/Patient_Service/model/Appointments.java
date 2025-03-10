@@ -21,13 +21,19 @@ public class Appointments {
     @Column(name = "doctor_id", nullable = false)
     private Long doctorId;
 
+    @Setter
+    @Getter
+    @Column(name = "nurse_id", nullable = false)
+    private Long nurseId;
+
     private LocalDateTime appointmentDate;
     private String reason;
 
     public Appointments() {}
-    public Appointments(Long patientId, Long doctorId, LocalDateTime appointmentDate, String reason) {
+    public Appointments(Long patientId, Long doctorId, Long nurseId, LocalDateTime appointmentDate, String reason) {
         this.patientId = patientId;
         this.doctorId = doctorId;
+        this.nurseId = nurseId;
         this.appointmentDate = appointmentDate;
         this.reason = reason;
     }

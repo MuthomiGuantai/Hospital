@@ -1,13 +1,19 @@
 package com.bruceycode.Patient_Service.service.helper;
 
+import com.bruceycode.Patient_Service.exception.NotFoundException;
 import com.bruceycode.Patient_Service.model.Admissions;
 import com.bruceycode.Patient_Service.repository.AdmissionsRepository;
 import com.bruceycode.Patient_Service.service.AdmissionsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,23 +26,47 @@ public class AdmissionsServiceImpl implements AdmissionsService {
     private final AdmissionsRepository admissionsRepository;
     private final RestTemplate restTemplate;
     private final DiscoveryClient discoveryClient;
-
+    private final HttpServletRequest request;
 
     private String getMedicalServiceUrl() {
         log.debug("Resolving MEDICAL_SERVICE URI");
-        String url = discoveryClient.getInstances("medical_service").get(0).getUri().toString();
+        List<ServiceInstance> instances = discoveryClient.getInstances("medical_service");
+        if (instances.isEmpty()) {
+            log.error("No instances of 'medical_service' found in discovery server");
+            throw new RuntimeException("Medical_Service not available");
+        }
+        String url = instances.get(0).getUri().toString();
         log.info("Resolved MEDICAL_SERVICE URI: {}", url);
         return url;
     }
 
+    private HttpHeaders getAuthHeaders() {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("No valid Authorization header found");
+            throw new RuntimeException("JWT token missing");
+        }
+        String jwtToken = header.substring(7);
+        log.debug("Forwarding JWT token: {}", jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        return headers;
+    }
+
     private void validatePatientExists(Long patientId) {
+        if (patientId == null) {
+            log.error("Patient ID is null during validation");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         log.info("Validating patient ID: {}", patientId);
         try {
-            restTemplate.getForObject(getMedicalServiceUrl() + "/patients/" + patientId, Object.class);
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            restTemplate.exchange(
+                    getMedicalServiceUrl() + "/patients/" + patientId, HttpMethod.GET, requestEntity, Object.class);
             log.debug("Patient ID {} validated successfully", patientId);
         } catch (Exception e) {
             log.error("Failed to validate patient ID {}: {}", patientId, e.getMessage());
-            throw e;
+            throw new RuntimeException("Patient validation failed: " + e.getMessage());
         }
     }
 
@@ -45,7 +75,7 @@ public class AdmissionsServiceImpl implements AdmissionsService {
         log.info("Creating admission: {}", admission);
         validatePatientExists(admission.getPatientId());
         Admissions savedAdmission = admissionsRepository.save(admission);
-        log.info("Successfully created admission: {}", savedAdmission);
+        log.info("Successfully created admission with ID {}: {}", savedAdmission.getId(), savedAdmission);
         return savedAdmission;
     }
 
@@ -86,15 +116,15 @@ public class AdmissionsServiceImpl implements AdmissionsService {
             Admissions admission = optionalAdmission.get();
             validatePatientExists(admissionDetails.getPatientId());
             admission.setPatientId(admissionDetails.getPatientId());
-            admission.setDischargeDate(admissionDetails.getDischargeDate());
             admission.setAdmissionDate(admissionDetails.getAdmissionDate());
+            admission.setDischargeDate(admissionDetails.getDischargeDate());
             admission.setReason(admissionDetails.getReason());
             Admissions updatedAdmission = admissionsRepository.save(admission);
             log.info("Successfully updated admission ID {}: {}", id, updatedAdmission);
             return updatedAdmission;
         }
         log.error("Admission not found for update with ID: {}", id);
-        throw new RuntimeException("Admission not found with ID " + id);
+        throw new NotFoundException("Admission not found with ID: " + id);
     }
 
     @Override
@@ -105,7 +135,7 @@ public class AdmissionsServiceImpl implements AdmissionsService {
             log.info("Successfully deleted admission with ID: {}", id);
         } else {
             log.error("Admission not found for deletion with ID: {}", id);
-            throw new RuntimeException("Admission not found with ID " + id);
+            throw new NotFoundException("Admission not found with ID: " + id);
         }
     }
 }

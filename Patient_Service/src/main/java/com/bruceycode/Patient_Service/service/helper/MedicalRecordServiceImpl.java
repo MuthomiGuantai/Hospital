@@ -5,9 +5,14 @@ import com.bruceycode.Patient_Service.repository.MedicalRecordRepository;
 import com.bruceycode.Patient_Service.service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,37 +25,64 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final MedicalRecordRepository medicalRecordRepository;
     private final RestTemplate restTemplate;
     private final DiscoveryClient discoveryClient;
+    private final HttpServletRequest request; // Added for JWT forwarding
 
     private String getMedicalServiceUrl() {
         log.debug("Resolving MEDICAL_SERVICE URI");
-        String url = discoveryClient.getInstances("medical_service").get(0).getUri().toString();
+        List<ServiceInstance> instances = discoveryClient.getInstances("medical_service");
+        if (instances.isEmpty()) {
+            log.error("No instances of 'medical_service' found in discovery server");
+            throw new RuntimeException("Medical_Service not available");
+        }
+        String url = instances.get(0).getUri().toString();
         log.info("Resolved MEDICAL_SERVICE URI: {}", url);
         return url;
     }
 
+    private HttpHeaders getAuthHeaders() {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("No valid Authorization header found");
+            throw new RuntimeException("JWT token missing");
+        }
+        String jwtToken = header.substring(7);
+        log.debug("Forwarding JWT token: {}", jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        return headers;
+    }
+
     private void validatePatientExists(Long patientId) {
+        if (patientId == null) {
+            log.error("Patient ID is null during validation");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         log.info("Validating patient ID: {}", patientId);
         try {
-            restTemplate.getForObject(getMedicalServiceUrl() + "/patients/" + patientId, Object.class);
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            restTemplate.exchange(
+                    getMedicalServiceUrl() + "/patients/" + patientId, HttpMethod.GET, requestEntity, Object.class);
             log.debug("Patient ID {} validated successfully", patientId);
         } catch (Exception e) {
-            log.error("Failed to validate patient ID {}: {}", patientId, e.getMessage());
-            throw e;
+            log.error("Patient does not exist with ID {}: {}", patientId, e.getMessage());
+            throw new RuntimeException("Patient validation failed: " + e.getMessage());
         }
     }
 
     private void validateDoctorExists(Long doctorId) {
-        if (doctorId != null) {
-            log.info("Validating doctor ID: {}", doctorId);
-            try {
-                restTemplate.getForObject(getMedicalServiceUrl() + "/doctors/" + doctorId, Object.class);
-                log.debug("Doctor ID {} validated successfully", doctorId);
-            } catch (Exception e) {
-                log.error("Failed to validate doctor ID {}: {}", doctorId, e.getMessage());
-                throw e;
-            }
-        } else {
-            log.debug("Doctor ID is null, skipping validation");
+        if (doctorId == null) {
+            log.error("Doctor ID is null during validation");
+            throw new IllegalArgumentException("Doctor ID cannot be null");
+        }
+        log.info("Validating doctor ID: {}", doctorId);
+        try {
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            restTemplate.exchange(
+                    getMedicalServiceUrl() + "/doctors/" + doctorId, HttpMethod.GET, requestEntity, Object.class);
+            log.debug("Doctor ID {} validated successfully", doctorId);
+        } catch (Exception e) {
+            log.error("Doctor does not exist with ID {}: {}", doctorId, e.getMessage());
+            throw new RuntimeException("Doctor validation failed: " + e.getMessage());
         }
     }
 
@@ -59,29 +91,29 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         log.info("Creating medical record: {}", medicalRecord);
         validatePatientExists(medicalRecord.getPatientId());
         validateDoctorExists(medicalRecord.getDoctorId());
-        MedicalRecord savedRecord = medicalRecordRepository.save(medicalRecord);
-        log.info("Successfully created medical record: {}", savedRecord);
-        return savedRecord;
+        MedicalRecord savedMedicalRecord = medicalRecordRepository.save(medicalRecord);
+        log.info("Successfully created medical record with ID {}: {}", savedMedicalRecord.getId(), savedMedicalRecord);
+        return savedMedicalRecord;
     }
 
     @Override
     public Optional<MedicalRecord> getMedicalRecordById(Long id) {
-        log.info("Fetching medical record by ID: {}", id);
-        Optional<MedicalRecord> record = medicalRecordRepository.findById(id);
-        if (record.isPresent()) {
-            log.info("Successfully fetched medical record ID {}: {}", id, record.get());
+        log.info("Received request for medical record with ID: {}", id);
+        Optional<MedicalRecord> medicalRecord = medicalRecordRepository.findById(id);
+        if (medicalRecord.isPresent()) {
+            log.info("Successfully retrieved medical record with ID {}: {}", id, medicalRecord.get());
         } else {
-            log.warn("No medical record found for ID: {}", id);
+            log.warn("Medical record not found for ID: {}", id);
         }
-        return record;
+        return medicalRecord;
     }
 
     @Override
     public List<MedicalRecord> getAllMedicalRecords() {
         log.info("Fetching all medical records");
-        List<MedicalRecord> records = medicalRecordRepository.findAll();
-        log.info("Successfully fetched {} medical records", records.size());
-        return records;
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findAll();
+        log.info("Successfully fetched {} medical records", medicalRecords.size());
+        return medicalRecords;
     }
 
     @Override
@@ -95,23 +127,23 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     public MedicalRecord updateMedicalRecord(Long id, MedicalRecord medicalRecordDetails) {
-        log.info("Updating medical record ID {} with details: {}", id, medicalRecordDetails);
-        Optional<MedicalRecord> optionalRecord = medicalRecordRepository.findById(id);
-        if (optionalRecord.isPresent()) {
-            MedicalRecord record = optionalRecord.get();
+        log.info("Updating medical record with ID {}: {}", id, medicalRecordDetails);
+        Optional<MedicalRecord> optionalMedicalRecord = medicalRecordRepository.findById(id);
+        if (optionalMedicalRecord.isPresent()) {
+            MedicalRecord medicalRecord = optionalMedicalRecord.get();
             validatePatientExists(medicalRecordDetails.getPatientId());
             validateDoctorExists(medicalRecordDetails.getDoctorId());
-            record.setPatientId(medicalRecordDetails.getPatientId());
-            record.setDoctorId(medicalRecordDetails.getDoctorId());
-            record.setCondition(medicalRecordDetails.getCondition());
-            record.setDiagnosisDate(medicalRecordDetails.getDiagnosisDate());
-            record.setNotes(medicalRecordDetails.getNotes());
-            MedicalRecord updatedRecord = medicalRecordRepository.save(record);
-            log.info("Successfully updated medical record ID {}: {}", id, updatedRecord);
-            return updatedRecord;
+            medicalRecord.setPatientId(medicalRecordDetails.getPatientId());
+            medicalRecord.setDoctorId(medicalRecordDetails.getDoctorId());
+            medicalRecord.setCondition(medicalRecordDetails.getCondition());
+            medicalRecord.setDiagnosisDate(medicalRecordDetails.getDiagnosisDate());
+            medicalRecord.setNotes(medicalRecordDetails.getNotes());
+            MedicalRecord updatedMedicalRecord = medicalRecordRepository.save(medicalRecord);
+            log.info("Successfully updated medical record with ID {}: {}", id, updatedMedicalRecord);
+            return updatedMedicalRecord;
         }
-        log.error("Medical record not found for update with ID: {}", id);
-        throw new RuntimeException("Medical Record not found with ID " + id);
+        log.error("Medical record not found with ID: {}", id);
+        throw new RuntimeException("Medical record not found with ID: " + id);
     }
 
     @Override
@@ -121,8 +153,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             medicalRecordRepository.deleteById(id);
             log.info("Successfully deleted medical record with ID: {}", id);
         } else {
-            log.error("Medical record not found for deletion with ID: {}", id);
-            throw new RuntimeException("Medical Record not found with ID " + id);
+            log.error("Medical record not found with ID: {}", id);
+            throw new RuntimeException("Medical record not found with ID: " + id);
         }
     }
 }

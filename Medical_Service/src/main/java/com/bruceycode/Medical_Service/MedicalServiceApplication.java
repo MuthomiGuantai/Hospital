@@ -24,7 +24,7 @@ public class MedicalServiceApplication {
 		SpringApplication.run(MedicalServiceApplication.class, args);
 	}
 
-	@Bean
+	/*@Bean
 	public CommandLineRunner loadData(UserRepository userRepository, DoctorRepository doctorRepository,
 									  NurseRepository nurseRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
@@ -69,5 +69,5 @@ public class MedicalServiceApplication {
 			nurse.setShiftSchedule("Morning Shift");
 			nurseRepository.save(nurse);
 		};
-	}
+	}*/
 }

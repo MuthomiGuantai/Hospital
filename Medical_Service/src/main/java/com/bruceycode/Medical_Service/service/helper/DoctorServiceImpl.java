@@ -2,18 +2,31 @@ package com.bruceycode.Medical_Service.service.helper;
 
 import com.bruceycode.Medical_Service.dto.medical_services.DoctorDTO;
 import com.bruceycode.Medical_Service.dto.medical_services.PatientDTO;
+import com.bruceycode.Medical_Service.dto.patient_services.AdmissionsDTO;
+import com.bruceycode.Medical_Service.dto.patient_services.AppointmentsDTO;
+import com.bruceycode.Medical_Service.dto.patient_services.MedicalRecordDTO;
+import com.bruceycode.Medical_Service.dto.patient_services.PatientDataDTO;
 import com.bruceycode.Medical_Service.model.entity.Doctor;
 import com.bruceycode.Medical_Service.model.entity.Nurse;
 import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.repository.DoctorRepository;
 import com.bruceycode.Medical_Service.repository.PatientRepository;
 import com.bruceycode.Medical_Service.service.DoctorService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +37,9 @@ import java.util.stream.Collectors;
 public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
+    private final DiscoveryClient discoveryClient;
+    private final RestTemplate restTemplate;
+    private final HttpServletRequest request;
 
     @Autowired
     private PatientRepository patientRepository;
@@ -112,6 +128,21 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    public List<PatientDTO> getPatientsByDoctorId(Long doctorId) {
+        log.info("Fetching patients for doctor ID: {}", doctorId);
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> {
+                    log.error("Doctor not found for ID: {}", doctorId);
+                    return new RuntimeException("Doctor not found with ID " + doctorId);
+                });
+        List<PatientDTO> patients = doctor.getPatients().stream()
+                .map(this::toPatientDto)
+                .collect(Collectors.toList());
+        log.info("Successfully fetched {} patients for doctor's ID: {}", patients.size(), doctorId);
+        return patients;
+    }
+
+    @Override
     public DoctorDTO addPatientToDoctor(Long doctorId, Long patientId) {
         log.info("Adding patient ID {} to doctor ID: {}", patientId, doctorId);
         Doctor doctor = doctorRepository.findById(doctorId)
@@ -129,6 +160,238 @@ public class DoctorServiceImpl implements DoctorService {
         Doctor updatedDoctor = doctorRepository.save(doctor);
         log.info("Successfully added patient ID {} to doctor ID {}: {}", patientId, doctorId, updatedDoctor);
         return toDto(updatedDoctor);
+    }
+
+    private String getPatientServiceUrl() {
+        log.debug("Resolving PATIENT_SERVICE URI");
+        List<ServiceInstance> instances = discoveryClient.getInstances("patient_service");
+        if (instances.isEmpty()) {
+            log.error("No instances of 'patient_service' found in discovery server");
+            throw new RuntimeException("Patient_Service not available");
+        }
+        String url = instances.get(0).getUri().toString();
+        log.info("Resolved PATIENT_SERVICE URI: {}", url);
+        return url;
+    }
+
+    private HttpHeaders getAuthHeaders() {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("No valid Authorization header found");
+            throw new RuntimeException("JWT token missing");
+        }
+        String jwtToken = header.substring(7);
+        log.debug("Forwarding JWT token: {}", jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        return headers;
+    }
+
+    private void validateDoctorPatientRelationship(Long doctorId, Long patientId) {
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        if (doctorOpt.isPresent() && !doctorOpt.get().getPatients().stream().anyMatch(p -> p.getPatientId().equals(patientId))) {
+            log.error("Doctor ID {} is not associated with patient ID {}", doctorId, patientId);
+            throw new RuntimeException("Doctor is not associated with this patient");
+        }
+    }
+
+    @Override
+    public MedicalRecordDTO createMedicalRecordForPatient(Long doctorId, Long patientId, MedicalRecordDTO medicalRecordDTO) {
+        log.info("Creating medical record for patient ID {} by doctor ID {}", patientId, doctorId);
+        if (patientId == null || doctorId == null || medicalRecordDTO == null) {
+            log.error("Invalid input: patientId={}, doctorId={}, medicalRecordDTO={}", patientId, doctorId, medicalRecordDTO);
+            throw new IllegalArgumentException("Patient ID, Doctor ID, or MedicalRecordDTO cannot be null");
+        }
+        validateDoctorPatientRelationship(doctorId, patientId);
+        medicalRecordDTO.setId(null);
+        medicalRecordDTO.setPatientId(patientId);
+        medicalRecordDTO.setDoctorId(doctorId);
+        HttpEntity<MedicalRecordDTO> requestEntity = new HttpEntity<>(medicalRecordDTO, getAuthHeaders());
+        ResponseEntity<MedicalRecordDTO> response = restTemplate.postForEntity(
+                getPatientServiceUrl() + "/medical-records", requestEntity, MedicalRecordDTO.class);
+        log.info("Successfully created medical record: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public MedicalRecordDTO getMedicalRecordById(Long doctorId, Long patientId, Long recordId) {
+        log.info("Fetching medical record ID {} for patient ID {} by doctor ID {}", recordId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<MedicalRecordDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/medical-records/" + recordId, HttpMethod.GET, requestEntity, MedicalRecordDTO.class);
+        return response.getBody();
+    }
+
+    @Override
+    public List<MedicalRecordDTO> getMedicalRecordsByPatientId(Long doctorId, Long patientId) {
+        log.info("Fetching medical records for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<MedicalRecordDTO[]> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/medical-records/patient/" + patientId, HttpMethod.GET, requestEntity, MedicalRecordDTO[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    @Override
+    public MedicalRecordDTO updateMedicalRecord(Long doctorId, Long patientId, Long recordId, MedicalRecordDTO medicalRecordDTO) {
+        log.info("Updating medical record ID {} for patient ID {} by doctor ID {}", recordId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<MedicalRecordDTO> requestEntity = new HttpEntity<>(medicalRecordDTO, getAuthHeaders());
+        ResponseEntity<MedicalRecordDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/medical-records/" + recordId, HttpMethod.PUT, requestEntity, MedicalRecordDTO.class);
+        log.info("Successfully updated medical record: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public void deleteMedicalRecord(Long doctorId, Long patientId, Long recordId) {
+        log.info("Deleting medical record ID {} for patient ID {} by doctor ID {}", recordId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        restTemplate.exchange(
+                getPatientServiceUrl() + "/medical-records/" + recordId, HttpMethod.DELETE, requestEntity, Void.class);
+        log.info("Successfully deleted medical record ID {}", recordId);
+    }
+
+    @Override
+    public AdmissionsDTO createAdmissionForPatient(Long doctorId, Long patientId, AdmissionsDTO admissionsDTO) {
+        log.info("Creating admission for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        admissionsDTO.setId(null);
+        admissionsDTO.setPatientId(patientId);
+        HttpEntity<AdmissionsDTO> requestEntity = new HttpEntity<>(admissionsDTO, getAuthHeaders());
+        ResponseEntity<AdmissionsDTO> response = restTemplate.postForEntity(
+                getPatientServiceUrl() + "/admissions", requestEntity, AdmissionsDTO.class);
+        log.info("Successfully created admission: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public AdmissionsDTO getAdmissionById(Long doctorId, Long patientId, Long admissionId) {
+        log.info("Fetching admission ID {} for patient ID {} by doctor ID {}", admissionId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<AdmissionsDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/admissions/" + admissionId, HttpMethod.GET, requestEntity, AdmissionsDTO.class);
+        return response.getBody();
+    }
+
+    @Override
+    public List<AdmissionsDTO> getAdmissionsByPatientId(Long doctorId, Long patientId) {
+        log.info("Fetching admissions for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<AdmissionsDTO[]> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/admissions/patient/" + patientId, HttpMethod.GET, requestEntity, AdmissionsDTO[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    @Override
+    public AdmissionsDTO updateAdmission(Long doctorId, Long patientId, Long admissionId, AdmissionsDTO admissionsDTO) {
+        log.info("Updating admission ID {} for patient ID {} by doctor ID {}", admissionId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        admissionsDTO.setPatientId(patientId);
+        HttpEntity<AdmissionsDTO> requestEntity = new HttpEntity<>(admissionsDTO, getAuthHeaders());
+        ResponseEntity<AdmissionsDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/admissions/" + admissionId, HttpMethod.PUT, requestEntity, AdmissionsDTO.class);
+        log.info("Successfully updated admission: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public void deleteAdmission(Long doctorId, Long patientId, Long admissionId) {
+        log.info("Deleting admission ID {} for patient ID {} by doctor ID {}", admissionId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        restTemplate.exchange(
+                getPatientServiceUrl() + "/admissions/" + admissionId, HttpMethod.DELETE, requestEntity, Void.class);
+        log.info("Successfully deleted admission ID {}", admissionId);
+    }
+
+    @Override
+    public AppointmentsDTO createAppointmentForPatient(Long doctorId, Long patientId, AppointmentsDTO appointmentsDTO) {
+        log.info("Creating appointment for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        appointmentsDTO.setId(null);
+        appointmentsDTO.setPatientId(patientId);
+        appointmentsDTO.setDoctorId(doctorId);
+        HttpEntity<AppointmentsDTO> requestEntity = new HttpEntity<>(appointmentsDTO, getAuthHeaders());
+        ResponseEntity<AppointmentsDTO> response = restTemplate.postForEntity(
+                getPatientServiceUrl() + "/appointments", requestEntity, AppointmentsDTO.class);
+        log.info("Successfully created appointment: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public AppointmentsDTO getAppointmentById(Long doctorId, Long patientId, Long appointmentId) {
+        log.info("Fetching appointment ID {} for patient ID {} by doctor ID {}", appointmentId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<AppointmentsDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/appointments/" + appointmentId, HttpMethod.GET, requestEntity, AppointmentsDTO.class);
+        return response.getBody();
+    }
+
+    @Override
+    public List<AppointmentsDTO> getAppointmentsByPatientId(Long doctorId, Long patientId) {
+        log.info("Fetching appointments for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        ResponseEntity<AppointmentsDTO[]> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/appointments/patient/" + patientId, HttpMethod.GET, requestEntity, AppointmentsDTO[].class);
+        return Arrays.asList(response.getBody());
+    }
+
+    @Override
+    public AppointmentsDTO updateAppointment(Long doctorId, Long patientId, Long appointmentId, AppointmentsDTO appointmentsDTO) {
+        log.info("Updating appointment ID {} for patient ID {} by doctor ID {}", appointmentId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        appointmentsDTO.setPatientId(patientId);
+        appointmentsDTO.setDoctorId(doctorId);
+        HttpEntity<AppointmentsDTO> requestEntity = new HttpEntity<>(appointmentsDTO, getAuthHeaders());
+        ResponseEntity<AppointmentsDTO> response = restTemplate.exchange(
+                getPatientServiceUrl() + "/appointments/" + appointmentId, HttpMethod.PUT, requestEntity, AppointmentsDTO.class);
+        log.info("Successfully updated appointment: {}", response.getBody());
+        return response.getBody();
+    }
+
+    @Override
+    public void deleteAppointment(Long doctorId, Long patientId, Long appointmentId) {
+        log.info("Deleting appointment ID {} for patient ID {} by doctor ID {}", appointmentId, patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+        restTemplate.exchange(
+                getPatientServiceUrl() + "/appointments/" + appointmentId, HttpMethod.DELETE, requestEntity, Void.class);
+        log.info("Successfully deleted appointment ID {}", appointmentId);
+    }
+
+    @Override
+    public PatientDataDTO getPatientData(Long doctorId, Long patientId) {
+        log.info("Fetching patient data for patient ID {} by doctor ID {}", patientId, doctorId);
+        validateDoctorPatientRelationship(doctorId, patientId);
+
+        Optional<Patient> patientOpt = patientRepository.findById(patientId);
+        if (!patientOpt.isPresent()) {
+            log.error("Patient not found for ID: {}", patientId);
+            throw new RuntimeException("Patient not found");
+        }
+        Patient patient = patientOpt.get();
+        PatientDTO patientDTO = toPatientDto(patient);
+
+        List<MedicalRecordDTO> medicalRecords = getMedicalRecordsByPatientId(doctorId, patientId);
+        List<AdmissionsDTO> admissions = getAdmissionsByPatientId(doctorId, patientId);
+        List<AppointmentsDTO> appointments = getAppointmentsByPatientId(doctorId, patientId);
+
+        PatientDataDTO patientData = new PatientDataDTO(
+                patientId,
+                patientDTO.getName(),
+                medicalRecords,
+                admissions,
+                appointments
+        );
+        log.info("Successfully fetched patient data for patient ID {}: {}", patientId, patientData);
+        return patientData;
     }
 
     private Doctor toEntity(DoctorDTO dto) {

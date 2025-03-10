@@ -5,10 +5,15 @@ import com.bruceycode.Patient_Service.repository.AppointmentsRepository;
 import com.bruceycode.Patient_Service.service.AppointmentsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,22 +25,47 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private final AppointmentsRepository appointmentsRepository;
     private final RestTemplate restTemplate;
     private final DiscoveryClient discoveryClient;
+    private final HttpServletRequest request; // Add this for JWT
 
     private String getMedicalServiceUrl() {
         log.debug("Resolving MEDICAL_SERVICE URI");
-        String url = discoveryClient.getInstances("medical_service").get(0).getUri().toString();
+        List<ServiceInstance> instances = discoveryClient.getInstances("medical_service");
+        if (instances.isEmpty()) {
+            log.error("No instances of 'medical_service' found in discovery server");
+            throw new RuntimeException("Medical_Service not available");
+        }
+        String url = instances.get(0).getUri().toString();
         log.info("Resolved MEDICAL_SERVICE URI: {}", url);
         return url;
     }
 
+    private HttpHeaders getAuthHeaders() {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("No valid Authorization header found");
+            throw new RuntimeException("JWT token missing");
+        }
+        String jwtToken = header.substring(7);
+        log.debug("Using JWT token: {}", jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        return headers;
+    }
+
     private void validatePatientExists(Long patientId) {
+        if (patientId == null) {
+            log.error("Patient ID is null during validation");
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         log.info("Validating patient ID: {}", patientId);
         try {
-            restTemplate.getForObject(getMedicalServiceUrl() + "/patients/" + patientId, Object.class);
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            restTemplate.exchange(
+                    getMedicalServiceUrl() + "/patients/" + patientId, HttpMethod.GET, requestEntity, Object.class);
             log.debug("Patient ID {} validated successfully", patientId);
         } catch (Exception e) {
             log.error("Failed to validate patient ID {}: {}", patientId, e.getMessage());
-            throw e; // Re-throw to maintain existing behavior
+            throw e;
         }
     }
 
@@ -43,11 +73,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         if (doctorId != null) {
             log.info("Validating doctor ID: {}", doctorId);
             try {
-                restTemplate.getForObject(getMedicalServiceUrl() + "/doctors/" + doctorId, Object.class);
+                HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+                restTemplate.exchange(
+                        getMedicalServiceUrl() + "/doctors/" + doctorId, HttpMethod.GET, requestEntity, Object.class);
                 log.debug("Doctor ID {} validated successfully", doctorId);
             } catch (Exception e) {
                 log.error("Failed to validate doctor ID {}: {}", doctorId, e.getMessage());
-                throw e; // Re-throw to maintain existing behavior
+                throw e;
             }
         } else {
             log.debug("Doctor ID is null, skipping validation");
@@ -57,6 +89,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public Appointments createAppointments(Appointments appointment) {
         log.info("Creating appointment: {}", appointment);
+        if (appointment.getPatientId() == null) {
+            log.error("Patient ID is null in appointment: {}", appointment);
+            throw new IllegalArgumentException("Patient ID cannot be null");
+        }
         validatePatientExists(appointment.getPatientId());
         validateDoctorExists(appointment.getDoctorId());
         Appointments savedAppointment = appointmentsRepository.save(appointment);
@@ -103,8 +139,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             validateDoctorExists(appointmentDetails.getDoctorId());
             appointment.setPatientId(appointmentDetails.getPatientId());
             appointment.setDoctorId(appointmentDetails.getDoctorId());
-            appointment.setReason(appointmentDetails.getReason());
+            appointment.setNurseId(appointmentDetails.getNurseId());
             appointment.setAppointmentDate(appointmentDetails.getAppointmentDate());
+            appointment.setReason(appointmentDetails.getReason());
             Appointments updatedAppointment = appointmentsRepository.save(appointment);
             log.info("Successfully updated appointment ID {}: {}", id, updatedAppointment);
             return updatedAppointment;
