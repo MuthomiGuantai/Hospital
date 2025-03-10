@@ -5,6 +5,7 @@ import com.bruceycode.Patient_Service.repository.MedicalRecordRepository;
 import com.bruceycode.Patient_Service.service.MedicalRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -23,7 +24,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     private String getMedicalServiceUrl() {
         log.debug("Resolving MEDICAL_SERVICE URI");
-        String url = discoveryClient.getInstances("medical_service").get(0).getUri().toString();
+        List<ServiceInstance> instances = discoveryClient.getInstances("medical_service");
+        if (instances.isEmpty()) {
+            log.error("No instances of 'medical_service' found in discovery server");
+            throw new RuntimeException("Medical_Service not available");
+        }
+        String url = instances.get(0).getUri().toString();
         log.info("Resolved MEDICAL_SERVICE URI: {}", url);
         return url;
     }
