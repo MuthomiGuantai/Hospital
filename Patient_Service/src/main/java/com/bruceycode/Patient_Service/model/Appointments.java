@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Setter
@@ -26,11 +27,11 @@ public class Appointments {
     @Column(name = "nurse_id", nullable = false)
     private Long nurseId;
 
-    private LocalDateTime appointmentDate;
+    private LocalDate appointmentDate;
     private String reason;
 
     public Appointments() {}
-    public Appointments(Long patientId, Long doctorId, Long nurseId, LocalDateTime appointmentDate, String reason) {
+    public Appointments(Long patientId, Long doctorId, Long nurseId, LocalDate appointmentDate, String reason) {
         this.patientId = patientId;
         this.doctorId = doctorId;
         this.nurseId = nurseId;

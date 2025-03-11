@@ -14,13 +14,13 @@ public class AppointmentsDTO {
     private Long patientId;
     private Long doctorId;
     private Long nurseId;
-    private LocalDateTime appointmentDate;
+    private LocalDate appointmentDate;
     private String reason;
 
     public AppointmentsDTO() {
     }
 
-    public AppointmentsDTO(Long id, Long patientId, Long doctorId, Long nurseId, LocalDateTime appointmentDate, String reason) {
+    public AppointmentsDTO(Long id, Long patientId, Long doctorId, Long nurseId, LocalDate appointmentDate, String reason) {
         Id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
