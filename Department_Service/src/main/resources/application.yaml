@@ -12,7 +12,7 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Department
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Department_db
     username: root
     password: Clearme@1824
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,7 +22,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://service-registry:8761/eureka/
     fetch-registry: true
     register-with-eureka: true
 logging:

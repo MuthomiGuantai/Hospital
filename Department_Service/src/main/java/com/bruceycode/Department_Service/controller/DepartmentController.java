@@ -21,7 +21,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
 
-    @PostMapping
+    @PostMapping("/register")
     public ResponseEntity<Department> createDepartment(@RequestBody Department department) {
         log.info("Received POST request to create department: {}", department);
         Department createdDepartment = departmentService.createDepartment(department);

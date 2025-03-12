@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  service-registry:
+    build:
+      context: ./Service_Registry
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    networks:
+      - medical-network
+
+  api-gateway:
+    build:
+      context: ./Api_Gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    depends_on:
+      - service-registry
+    networks:
+      - medical-network
+
+  mysql-medical:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: Clearme@1824
+      MYSQL_DATABASE: Medical
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "33061:3306"  # Expose on different host port to avoid conflicts
+    volumes:
+      - mysql-medical-data:/var/lib/mysql
+    networks:
+      - medical-network
+
+  medical-service:
+    build:
+      context: ./Medical_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8101:8101"
+    depends_on:
+      - service-registry
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-medical:3306/Medical?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - medical-network
+
+  mysql-patient:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: Clearme@1824
+      MYSQL_DATABASE: Patient_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "33062:3306"  # Different host port
+    volumes:
+      - mysql-patient-data:/var/lib/mysql
+    networks:
+      - medical-network
+
+  patient-service:
+    build:
+      context: ./Patient_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8102:8102"
+    depends_on:
+      - service-registry
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-patient:3306/Patient_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - medical-network
+
+  mysql-department:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: Clearme@1824
+      MYSQL_DATABASE: Department_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "33063:3306"  # Different host port
+    volumes:
+      - mysql-department-data:/var/lib/mysql
+    networks:
+      - medical-network
+  department-service:
+    build:
+      context: ./Department_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8103:8103"
+    depends_on:
+      - service-registry
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-department:3306/Department_db?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    networks:
+      - medical-network
+
+networks:
+  medical-network:
+    driver: bridge
+
+volumes:
+  mysql-medical-data:
+  mysql-patient-data:
+  mysql-department-data:
+  mysql-gateway-data:

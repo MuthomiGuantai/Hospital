@@ -1,12 +1,13 @@
 package com.bruceycode.Department_Service.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Setter
 @Getter
 @Entity
 @Table(name = "departments")
@@ -49,18 +50,6 @@ public class Department {
         this.doctors = doctors != null ? new ArrayList<>(doctors) : new ArrayList<>();
         this.nurses = nurses != null ? new ArrayList<>(nurses) : new ArrayList<>();
         this.facilities = facilities != null ? new ArrayList<>(facilities) : new ArrayList<>();
-    }
-
-    public void setDepartmentId(Long departmentId) {
-        this.departmentId = departmentId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setHeadOfDepartment(Long headOfDepartment) {
-        this.headOfDepartment = headOfDepartment;
     }
 
     public void setDoctors(List<Long> doctors) {

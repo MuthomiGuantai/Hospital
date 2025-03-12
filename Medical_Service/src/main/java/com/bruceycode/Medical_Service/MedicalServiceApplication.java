@@ -24,7 +24,7 @@ public class MedicalServiceApplication {
 		SpringApplication.run(MedicalServiceApplication.class, args);
 	}
 
-	/*@Bean
+	@Bean
 	public CommandLineRunner loadData(UserRepository userRepository, DoctorRepository doctorRepository,
 									  NurseRepository nurseRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
@@ -35,7 +35,7 @@ public class MedicalServiceApplication {
 			admin.setRole(UserRole.ADMIN);
 			userRepository.save(admin);
 
-			User doctorUser = new User();
+			/*User doctorUser = new User();
 			doctorUser.setUsername("doctorA");
 			doctorUser.setPassword(passwordEncoder.encode("doctor123"));
 			doctorUser.setRole(UserRole.DOCTOR);
@@ -67,7 +67,7 @@ public class MedicalServiceApplication {
 			nurse.setContactEmail("violet.wanjiru@hospital.com");
 			nurse.setContactPhone("0708705439");
 			nurse.setShiftSchedule("Morning Shift");
-			nurseRepository.save(nurse);
+			nurseRepository.save(nurse);*/
 		};
-	}*/
+	}
 }
