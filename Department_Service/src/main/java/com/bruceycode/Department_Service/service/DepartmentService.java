@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepartmentService {
-    Department createDepartment(Department department);
-    Optional<DepartmentDTO> getDepartmentById(Long id);
-    List<DepartmentDTO> getAllDepartments();
-    Department updateDepartment(Long id, Department departmentDetails);
+    Department createDepartment(Department department, String jwtToken);
+    Optional<DepartmentDTO> getDepartmentById(Long id, String jwtToken);
+    List<DepartmentDTO> getAllDepartments(String jwtToken);
+    Department updateDepartment(Long id, Department departmentDetails, String jwtToken);
     void deleteDepartment(Long id);
 }

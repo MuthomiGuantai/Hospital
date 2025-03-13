@@ -8,10 +8,18 @@ import com.bruceycode.Medical_Service.model.entity.Patient;
 import com.bruceycode.Medical_Service.repository.NurseRepository;
 import com.bruceycode.Medical_Service.repository.PatientRepository;
 import com.bruceycode.Medical_Service.service.NurseService;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +32,47 @@ import java.util.stream.Collectors;
 public class NurseServiceImpl implements NurseService {
 
     private final NurseRepository nurseRepository;
+    private final DiscoveryClient discoveryClient;
+    private final RestTemplate restTemplate;
+    private final HttpServletRequest request;
 
     @Autowired
     private PatientRepository patientRepository;
+
+    private HttpHeaders getAuthHeaders() {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            log.error("No valid Authorization header found");
+            throw new RuntimeException("JWT token missing");
+        }
+        String jwtToken = header.substring(7);
+        log.debug("Forwarding JWT token: {}", jwtToken);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + jwtToken);
+        return headers;
+    }
+
+    private void validateDepartmentId(Long departmentId) {
+        if (departmentId != null) {
+            List<ServiceInstance> instances = discoveryClient.getInstances("department_service");
+            if (instances.isEmpty()) {
+                log.error("No instances of 'department_service' found");
+                throw new RuntimeException("Department_Service not available");
+            }
+            String url = instances.get(0).getUri().toString() + "/departments/" + departmentId;
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    log.error("Department with ID {} does not exist", departmentId);
+                    throw new IllegalArgumentException("Department with ID " + departmentId + " does not exist");
+                }
+            } catch (Exception e) {
+                log.error("Failed to validate departmentId {}: {}", departmentId, e.getMessage());
+                throw new IllegalArgumentException("Invalid departmentId: " + departmentId);
+            }
+        }
+    }
 
     @Override
     public NurseDTO createNurse(NurseDTO nurseDTO) {
@@ -74,7 +120,7 @@ public class NurseServiceImpl implements NurseService {
             Nurse nurse = optionalNurse.get();
             nurse.setName(nurseDetails.getName());
             nurse.setUsername(nurseDetails.getUsername());
-            nurse.setDepartment(nurseDetails.getDepartment());
+            nurse.setDepartmentId(nurseDetails.getDepartmentId());
             nurse.setContactPhone(nurseDetails.getContactPhone());
             nurse.setContactEmail(nurseDetails.getContactEmail());
             nurse.setShiftSchedule(nurseDetails.getShiftSchedule());
@@ -131,7 +177,7 @@ public class NurseServiceImpl implements NurseService {
         Nurse nurse = new Nurse();
         nurse.setName(dto.getName());
         nurse.setUsername(dto.getUsername());
-        nurse.setDepartment(dto.getDepartment());
+        nurse.setDepartmentId(dto.getDepartmentId());
         nurse.setContactPhone(dto.getContactPhone());
         nurse.setContactEmail(dto.getContactEmail());
         nurse.setShiftSchedule(dto.getShiftSchedule());
@@ -162,7 +208,7 @@ public class NurseServiceImpl implements NurseService {
                 nurse.getNurseId(),
                 nurse.getName(),
                 nurse.getUsername(),
-                nurse.getDepartment(),
+                nurse.getDepartmentId(),
                 nurse.getContactEmail(),
                 nurse.getContactPhone(),
                 nurse.getShiftSchedule(),

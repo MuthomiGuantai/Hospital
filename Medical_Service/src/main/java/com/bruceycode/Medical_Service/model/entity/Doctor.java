@@ -27,7 +27,7 @@ public class Doctor {
     private String specialization;
 
     @Column
-    private String department;
+    private Long departmentId;
 
     @Column
     private String contactPhone;
@@ -53,12 +53,12 @@ public class Doctor {
 
     public Doctor() {}
 
-    public Doctor(String name, String specialization, String department,
+    public Doctor(String name, String specialization, Long departmentId,
                   String contactPhone, String contactEmail, String officeLocation,
                   String schedule) {
         this.name = name;
         this.specialization = specialization;
-        this.department = department;
+        this.departmentId = departmentId;
         this.contactPhone = contactPhone;
         this.contactEmail = contactEmail;
         this.officeLocation = officeLocation;

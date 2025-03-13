@@ -44,6 +44,28 @@ public class DoctorServiceImpl implements DoctorService {
     @Autowired
     private PatientRepository patientRepository;
 
+    private void validateDepartmentId(Long departmentId) {
+        if (departmentId != null) {
+            List<ServiceInstance> instances = discoveryClient.getInstances("department_service");
+            if (instances.isEmpty()) {
+                log.error("No instances of 'department_service' found");
+                throw new RuntimeException("Department_Service not available");
+            }
+            String url = instances.get(0).getUri().toString() + "/departments/" + departmentId;
+            HttpEntity<Void> requestEntity = new HttpEntity<>(getAuthHeaders());
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+                if (!response.getStatusCode().is2xxSuccessful()) {
+                    log.error("Department with ID {} does not exist", departmentId);
+                    throw new IllegalArgumentException("Department with ID " + departmentId + " does not exist");
+                }
+            } catch (Exception e) {
+                log.error("Failed to validate departmentId {}: {}", departmentId, e.getMessage());
+                throw new IllegalArgumentException("Invalid departmentId: " + departmentId);
+            }
+        }
+    }
+
     @Override
     public DoctorDTO createDoctor(DoctorDTO doctorDTO) {
         log.info("Creating doctor: {}", doctorDTO);
@@ -93,7 +115,7 @@ public class DoctorServiceImpl implements DoctorService {
             doctor.setName(doctorDetails.getName());
             doctor.setUsername(doctorDetails.getUsername());
             doctor.setSpecialization(doctorDetails.getSpecialization());
-            doctor.setDepartment(doctorDetails.getDepartment());
+            doctor.setDepartmentId(doctorDetails.getDepartmentId());
             doctor.setContactPhone(doctorDetails.getContactPhone());
             doctor.setContactEmail(doctorDetails.getContactEmail());
             doctor.setOfficeLocation(doctorDetails.getOfficeLocation());
@@ -399,7 +421,7 @@ public class DoctorServiceImpl implements DoctorService {
         doctor.setName(dto.getName());
         doctor.setUsername(dto.getUsername());
         doctor.setSpecialization(dto.getSpecialization());
-        doctor.setDepartment(dto.getDepartment());
+        doctor.setDepartmentId(dto.getDepartmentId());
         doctor.setContactPhone(dto.getContactPhone());
         doctor.setContactEmail(dto.getContactEmail());
         doctor.setOfficeLocation(dto.getOfficeLocation());
@@ -432,7 +454,7 @@ public class DoctorServiceImpl implements DoctorService {
                 doctor.getName(),
                 doctor.getUsername(),
                 doctor.getSpecialization(),
-                doctor.getDepartment(),
+                doctor.getDepartmentId(),
                 doctor.getContactPhone(),
                 doctor.getContactEmail(),
                 doctor.getOfficeLocation(),

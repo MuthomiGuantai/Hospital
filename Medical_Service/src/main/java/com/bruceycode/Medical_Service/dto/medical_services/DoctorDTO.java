@@ -16,7 +16,7 @@ public class DoctorDTO {
     private String name;
     private String username;
     private String specialization;
-    private String department;
+    private Long departmentId;
     private String contactPhone;
     private String contactEmail;
     private String officeLocation;
@@ -28,12 +28,12 @@ public class DoctorDTO {
     public DoctorDTO() {
     }
 
-    public DoctorDTO(Long doctorId, String name, String username, String specialization, String department, String contactPhone, String contactEmail, String officeLocation, String schedule, List<Long> patientIds, List<PatientDTO> patients) {
+    public DoctorDTO(Long doctorId, String name, String username, String specialization, Long departmentId, String contactPhone, String contactEmail, String officeLocation, String schedule, List<Long> patientIds, List<PatientDTO> patients) {
         this.doctorId = doctorId;
         this.name = name;
         this.username = username;
         this.specialization = specialization;
-        this.department = department;
+        this.departmentId = departmentId;
         this.contactPhone = contactPhone;
         this.contactEmail = contactEmail;
         this.officeLocation = officeLocation;

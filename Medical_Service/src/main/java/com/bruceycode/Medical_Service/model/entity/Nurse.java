@@ -25,7 +25,7 @@ public class Nurse {
     private String username;
 
     @Column
-    private String department;
+    private Long departmentId;
 
     @Column
     private String contactPhone;
@@ -47,10 +47,10 @@ public class Nurse {
 
     public Nurse() {}
 
-    public Nurse(String name, String department, String contactPhone,
+    public Nurse(String name, Long departmentId, String contactPhone,
                  String contactEmail, String shiftSchedule) {
         this.name = name;
-        this.department = department;
+        this.departmentId = departmentId;
         this.contactPhone = contactPhone;
         this.contactEmail = contactEmail;
         this.shiftSchedule = shiftSchedule;

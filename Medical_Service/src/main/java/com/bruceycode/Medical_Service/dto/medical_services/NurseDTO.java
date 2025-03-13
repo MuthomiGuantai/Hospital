@@ -15,7 +15,7 @@ public class NurseDTO {
     private Long nurseId;
     private String name;
     private String username;
-    private String department;
+    private Long departmentId;
     private String contactPhone;
     private String contactEmail;
     private String shiftSchedule;
@@ -23,15 +23,14 @@ public class NurseDTO {
     @JsonDeserialize(contentUsing = PatientIdDeserializer.class)
     private List<PatientDTO> patients = new ArrayList<>();
 
-
     public NurseDTO() {
     }
 
-    public NurseDTO(Long nurseId, String name, String username, String department, String contactEmail, String contactPhone, String shiftSchedule, List<Long> patientIds, List<PatientDTO> patients) {
+    public NurseDTO(Long nurseId, String name, String username, Long departmentId, String contactEmail, String contactPhone, String shiftSchedule, List<Long> patientIds, List<PatientDTO> patients) {
         this.nurseId = nurseId;
         this.name = name;
         this.username = username;
-        this.department = department;
+        this.departmentId = departmentId;
         this.contactEmail = contactEmail;
         this.contactPhone = contactPhone;
         this.shiftSchedule = shiftSchedule;
