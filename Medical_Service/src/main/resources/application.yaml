@@ -39,5 +39,14 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
 jwt:
   secret: d5BNg9BhIWzwY09+R2fss4iBEvoNd+eAqHU7o1BouK4=

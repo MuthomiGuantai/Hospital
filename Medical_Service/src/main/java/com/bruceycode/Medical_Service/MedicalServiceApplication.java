@@ -29,13 +29,13 @@ public class MedicalServiceApplication {
 									  NurseRepository nurseRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
 			// Users
-			User admin = new User();
+			/*User admin = new User();
 			admin.setUsername("admin");
 			admin.setPassword(passwordEncoder.encode("admin123"));
 			admin.setRole(UserRole.ADMIN);
 			userRepository.save(admin);
 
-			/*User doctorUser = new User();
+			User doctorUser = new User();
 			doctorUser.setUsername("doctorA");
 			doctorUser.setPassword(passwordEncoder.encode("doctor123"));
 			doctorUser.setRole(UserRole.DOCTOR);
@@ -52,7 +52,7 @@ public class MedicalServiceApplication {
 			doctor.setName("Dr. Bruce Muthomi");
 			doctor.setUsername("doctorA");
 			doctor.setSpecialization("Orthopediology");
-			doctor.setDepartment("Orthopedic Center");
+			doctor.setDepartmentId(1L);
 			doctor.setContactPhone("0791890480");
 			doctor.setContactEmail("bruce.muthomi@hospital.com");
 			doctor.setSchedule("{\\\"Monday\\\": \\\"9:00 AM - 5:00 PM\\\", \\\"Tuesday\\\": \\\"10:00 AM - 6:00 PM\\\"}");
@@ -63,7 +63,7 @@ public class MedicalServiceApplication {
 			Nurse nurse = new Nurse();
 			nurse.setName("Violet Wanjiru");
 			nurse.setUsername("nurseA");
-			nurse.setDepartment("Orthopedic Center");
+			nurse.setDepartmentId(1L);
 			nurse.setContactEmail("violet.wanjiru@hospital.com");
 			nurse.setContactPhone("0708705439");
 			nurse.setShiftSchedule("Morning Shift");
