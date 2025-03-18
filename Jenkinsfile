@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        maven 'Maven3' // Ensure this matches the name in Jenkins config
+    }
     environment {
         // Define ports for verification
         SERVICE_REGISTRY_PORT = '8761'
