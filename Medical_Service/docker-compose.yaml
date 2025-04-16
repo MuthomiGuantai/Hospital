@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: Clearme@1824
+      MYSQL_DATABASE: Medical
+      MYSQL_USER: user
+      MYSQL_PASSSWORD: password
+    ports:
+      - "33061:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medical-network
+
+  medical-service:
+    image: guantai.muthomi/medical-service:latest
+    container_name: medical_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - MYSQL_HOST=mysql_db
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Clearme@1824
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_DATASOURCE_INITIALIZATION_MODE=never
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - medical-network
+
+networks:
+  medical-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

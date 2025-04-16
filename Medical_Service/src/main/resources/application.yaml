@@ -1,5 +1,5 @@
 server:
-  port: 8101
+  port: 8080
   error:
     include-message: always
 
@@ -11,8 +11,11 @@ spring:
       ddl-auto: update
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/Medical
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:33061/Medical
     username: root
     password: Clearme@1824
     driver-class-name: com.mysql.cj.jdbc.Driver

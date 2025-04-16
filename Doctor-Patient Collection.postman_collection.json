@@ -1,0 +1,280 @@
+{
+	"info": {
+		"_postman_id": "8a4a9222-7e2a-429e-97fd-118c1d20e51d",
+		"name": "Doctor-Patient Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8533962"
+	},
+	"item": [
+		{
+			"name": "CreateMedical-Record",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/medical-records",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"medical-records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createAdmission",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/admissions",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"admissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "createAppointments",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/appointments",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"appointments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetMedical-records",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/medical-records",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"medical-records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAdmissions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/admissions",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"admissions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAppointments",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/appointments",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"appointments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateMedical-records",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/medical-records/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"medical-records",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateAdmissions",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/admissions/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"admissions",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateAppointments",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/appointments/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"appointments",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteMedical-records",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/medical-records/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"medical-records",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteAdmissions",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/admissions/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"admissions",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteAppointments",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8101/doctors/1/patients/1/appointments/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8101",
+					"path": [
+						"doctors",
+						"1",
+						"patients",
+						"1",
+						"appointments",
+						"1"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

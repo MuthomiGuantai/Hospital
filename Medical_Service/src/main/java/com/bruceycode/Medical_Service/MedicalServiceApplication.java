@@ -29,7 +29,7 @@ public class MedicalServiceApplication {
 									  NurseRepository nurseRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
 			// Users
-			/*User admin = new User();
+			User admin = new User();
 			admin.setUsername("admin");
 			admin.setPassword(passwordEncoder.encode("admin123"));
 			admin.setRole(UserRole.ADMIN);
@@ -67,7 +67,7 @@ public class MedicalServiceApplication {
 			nurse.setContactEmail("violet.wanjiru@hospital.com");
 			nurse.setContactPhone("0708705439");
 			nurse.setShiftSchedule("Morning Shift");
-			nurseRepository.save(nurse);*/
+			nurseRepository.save(nurse);
 		};
 	}
 }
